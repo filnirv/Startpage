@@ -2,86 +2,165 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bookmarks • gestor pessoal com GitHub Sync</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>Bookmarks • gestor pessoal</title>
     <style>
         * {
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
         }
-        
+
         body {
             background-color: #000;
             color: #fff;
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
+            align-items: stretch;
             justify-content: flex-start;
-            padding: 20px;
-            padding-top: 70px;
-            margin: 0;
-            height: 760px;
-            width: 370px;
-            overflow-y: auto;
+            min-height: 100vh;
+            width: 100%;
+            max-width: 100vw;
             overflow-x: hidden;
+            margin: 0;
+            padding: 0;
             position: relative;
         }
 
-        /* Cabeçalho fixo sem moldura */
         .fixed-header {
-            position: fixed;
+            position: sticky;
             top: 0;
             left: 0;
-            right: 0;
-            width: 370px;
+            width: 100%;
             background-color: #000;
-            padding: 10px 15px;
+            z-index: 30;
+            padding: 12px 16px;
+            border-bottom: 1px solid #222;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            z-index: 100;
-            gap: 8px;
-        }
-
-        .header-buttons-left {
-            display: flex;
+            justify-content: space-between;
             gap: 12px;
+            flex-wrap: nowrap;
         }
 
-        .header-buttons-right {
-            display: flex;
-            gap: 12px;
+        .search-wrapper {
+            flex: 1;
+            min-width: 0;
         }
 
-        .header-btn {
-            width: 32px;
-            height: 32px;
-            background-color: transparent;
+        .search-input {
+            width: 100%;
+            padding: 10px 14px;
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 40px;
+            color: white;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: #ffa500;
+            background-color: #222;
+        }
+
+        .search-input::placeholder {
+            color: #888;
+        }
+
+        .add-btn-header {
+            background: transparent;
             border: none;
+            color: white;
+            font-size: 28px;
             cursor: pointer;
+            width: 44px;
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
-            font-size: 18px;
-            color: #888;
-            border-radius: 0;
+            border-radius: 30px;
+            transition: all 0.2s;
+            flex-shrink: 0;
         }
 
-        .header-btn:hover {
+        .add-btn-header:hover {
+            background-color: #222;
             color: #ffa500;
-            transform: scale(1.05);
         }
 
-        /* Container com 5 colunas fixas */
+        .menu-dots {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .dots-button {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 30px;
+            transition: all 0.2s;
+        }
+
+        .dots-button:hover {
+            background-color: #222;
+            color: #ffa500;
+        }
+
+        .menu-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 52px;
+            background-color: #111;
+            min-width: 180px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            z-index: 40;
+            overflow: hidden;
+        }
+
+        .menu-dropdown button {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-dropdown button:hover {
+            background-color: #222;
+            color: #ffa500;
+        }
+
+        .menu-dropdown.show {
+            display: block;
+        }
+
         .bookmark-container {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 12px 8px;
             width: 100%;
-            margin-bottom: 20px;
+            padding: 16px 12px 90px 12px;
+            margin: 0;
         }
 
         .bookmark {
@@ -89,8 +168,17 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            width: 100%;
             text-align: center;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .bookmark.edit-mode {
+            border: 2px solid #ffa500;
+            border-radius: 16px;
+            padding: 8px 4px;
+            background-color: rgba(255, 165, 0, 0.05);
+            box-shadow: 0 0 8px rgba(255, 165, 0, 0.3);
         }
 
         .bookmark a {
@@ -111,116 +199,72 @@
             color: black;
         }
 
-        /* Estilo para o favicon imagem */
         .favicon-img {
-            width: 32px;
-            height: 32px;
-            margin-bottom: 5px;
+            width: 40px;
+            height: 40px;
+            margin-bottom: 6px;
             object-fit: contain;
         }
 
-        /* Estilo para o favicon texto (quando imagem falha) */
         .favicon-text {
-            width: 32px;
-            height: 32px;
-            margin-bottom: 5px;
+            width: 40px;
+            height: 40px;
+            margin-bottom: 6px;
             background: #333;
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
             border-radius: 50%;
             border: 1px solid #555;
             transition: all 0.2s;
         }
 
-        .bookmark div:not(.favicon-text) {
+        .bookmark div:last-child {
             font-size: 11px;
-            line-height: 1.2;
+            line-height: 1.3;
             word-break: break-word;
             max-width: 100%;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            padding: 0 2px;
         }
 
-        /* Botões de ação (editar/excluir) */
         .action-buttons {
             display: none;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 6px;
-            gap: 4px;
+            flex-direction: row;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 8px;
             width: 100%;
         }
-        
+
         .action-buttons button {
             background: #222;
             border: 1px solid #555;
             color: white;
-            font-size: 9px;
-            padding: 4px 8px;
-            border-radius: 12px;
-            width: 50px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
             cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
         }
-        
+
         .action-buttons button:hover {
             background: #ffa500;
             color: black;
             border-color: orange;
+            transform: scale(1.05);
         }
 
-        /* Sidebar - centrada na página com grid de 4 colunas */
-        .sidebar {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #1e1e1e;
-            padding: 20px;
-            border-radius: 20px;
-            border: 1px solid #ffa500;
-            z-index: 50;
-            box-shadow: 0 4px 20px rgba(255,165,0,0.3);
-            max-width: 90%;
-            width: auto;
-        }
-
-        .sidebar-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px 20px;
-            align-items: start;
-            justify-items: center;
-        }
-
-        .sidebar .bookmark {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0;
-            width: 100%;
-            min-width: 50px;
-        }
-        
-        .sidebar .bookmark a div {
-            font-size: 10px;
-            white-space: nowrap;
-        }
-        
-        .sidebar .favicon-img,
-        .sidebar .favicon-text {
-            width: 28px;
-            height: 28px;
-            font-size: 14px;
-        }
-
-        /* Modal do GitHub */
-        .github-modal {
+        .modal {
             display: none;
             position: fixed;
             z-index: 200;
@@ -228,107 +272,19 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.95);
-        }
-
-        .github-modal-content {
-            background-color: #111;
-            margin: 10% auto;
-            padding: 20px;
-            border: 1px solid #ffa500;
-            width: 320px;
-            border-radius: 8px;
-        }
-
-        .github-modal-content h3 {
-            color: orange;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .campo-sync {
-            margin-bottom: 15px;
-        }
-
-        .campo-sync label {
-            display: block;
-            color: #fff;
-            font-size: 11px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            letter-spacing: 0.5px;
-        }
-
-        .github-input {
-            width: 100%;
-            padding: 8px;
-            background-color: #222;
-            border: 1px solid #ffa500;
-            color: white;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-
-        .github-input:focus {
-            outline: none;
-            border-color: #ff8c00;
-        }
-
-        /* Botões lado a lado no modal - sem texto */
-        .modal-buttons-row {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 10px;
-            background-color: #ffa500;
-            border: none;
-            border-radius: 4px;
-            color: #000;
-            font-weight: bold;
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
+            background-color: rgba(0,0,0,0.9);
             align-items: center;
             justify-content: center;
-            gap: 5px;
-        }
-
-        .modal-btn:hover {
-            background-color: #ff8c00;
-            transform: scale(1.02);
-        }
-
-        .sync-status {
-            font-size: 11px;
-            text-align: center;
-            margin-top: 12px;
-            color: #ffa500;
-        }
-
-        /* Modal padrão */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 100;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.85);
         }
 
         .modal-content {
             background-color: #111;
-            margin: 25% auto;
-            padding: 20px;
+            margin: 0 auto;
+            padding: 24px;
             border: 1px solid #ffa500;
-            width: 280px;
-            border-radius: 8px;
+            width: 90%;
+            max-width: 320px;
+            border-radius: 24px;
         }
 
         .close {
@@ -338,24 +294,22 @@
             font-weight: bold;
             cursor: pointer;
         }
-        
-        .close:hover { 
-            color: orange; 
-        }
+        .close:hover { color: orange; }
 
         .input-fields {
             display: flex;
             flex-direction: column;
-            margin-top: 15px;
+            margin-top: 20px;
         }
 
         .input-field {
-            padding: 8px;
-            margin-bottom: 15px;
+            padding: 12px;
+            margin-bottom: 16px;
             border: 1px solid #444;
             background-color: #222;
             color: white;
-            border-radius: 4px;
+            border-radius: 12px;
+            font-size: 15px;
         }
 
         .input-field:focus {
@@ -365,263 +319,498 @@
         .submit-button {
             background-color: #ff8c00;
             border: none;
-            border-radius: 5px;
+            border-radius: 40px;
             color: white;
-            padding: 8px;
+            padding: 12px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 16px;
             transition: background 0.2s;
         }
-        
-        .submit-button:hover { 
-            background-color: #e07b00; 
+        .submit-button:hover { background-color: #e07b00; }
+
+        .custom-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a1a;
+            border: 1px solid #ffa500;
+            border-radius: 20px;
+            padding: 24px;
+            min-width: 260px;
+            max-width: 320px;
+            text-align: center;
+            z-index: 300;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
         }
 
-        /* Dropdown */
-        .dropdown {
+        .custom-alert p {
+            color: white;
+            font-size: 15px;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+
+        .custom-alert button {
+            background: #ff8c00;
+            border: none;
+            border-radius: 30px;
+            color: white;
+            padding: 10px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .custom-alert button:hover {
+            background: #e07b00;
+            transform: scale(1.02);
+        }
+
+        .sidebar {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a1a;
+            border-radius: 28px;
+            border: 1px solid #ffa500;
+            z-index: 150;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            width: 340px;
+            max-width: 90vw;
+            backdrop-filter: blur(4px);
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: #111;
+            border-bottom: 1px solid #333;
+        }
+
+        .sidebar-icon-btn {
+            background: #222;
+            border: 1px solid #444;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+
+        .sidebar-icon-btn:hover {
+            background: #ffa500;
+            color: black;
+            border-color: #ffa500;
+        }
+
+        .sidebar-header-spacer {
+            flex: 1;
+        }
+
+        .sidebar-content {
+            padding: 16px;
+            max-height: 60vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar-content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-track {
+            background: #222;
+            border-radius: 10px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-thumb {
+            background: #ffa500;
+            border-radius: 10px;
+        }
+
+        .sidebar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(70px, 1fr));
+            gap: 16px 10px;
+            align-items: start;
+            justify-items: center;
+            width: 100%;
+        }
+
+        .sidebar .bookmark {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 100%;
             position: relative;
         }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #111;
-            min-width: 140px;
-            box-shadow: 0 8px 16px rgba(255,165,0,0.2);
-            z-index: 20;
-            top: 35px;
-            left: 0;
-            border: 1px solid #333;
-            border-radius: 4px;
+        
+        .sidebar .bookmark a {
+            width: 100%;
+        }
+        
+        .sidebar .bookmark a div:last-child {
+            font-size: 10px;
+            white-space: normal;
+            word-break: break-word;
+            text-align: center;
+            line-height: 1.2;
+            max-width: 100%;
+        }
+        
+        .sidebar .favicon-img,
+        .sidebar .favicon-text {
+            width: 36px;
+            height: 36px;
+            font-size: 16px;
         }
 
-        .dropdown:hover .dropdown-content {
+        #import-file {
+            display: none;
+        }
+
+        .gist-modal-content {
+            background-color: #111;
+            margin: 0 auto;
+            padding: 24px;
+            border: 1px solid #ffa500;
+            width: 90%;
+            max-width: 380px;
+            border-radius: 24px;
+        }
+
+        .gist-label {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 5px;
+            margin-top: 10px;
             display: block;
         }
 
-        .dropdown-content button {
+        .gist-input {
             width: 100%;
-            color: white;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            padding: 10px;
-            text-align: left;
-            font-size: 12px;
-            border-bottom: 1px solid #222;
-        }
-
-        .dropdown-content button:hover {
+            padding: 12px;
+            margin: 5px 0 10px 0;
+            border: 1px solid #444;
             background-color: #222;
-            color: orange;
+            color: white;
+            border-radius: 12px;
+            font-size: 14px;
         }
 
-        /* Import file escondido */
-        #import-file {
-            display: none;
+        .gist-input[type="password"] {
+            letter-spacing: 2px;
+            font-family: monospace;
+        }
+
+        .gist-input:focus {
+            outline: 1px solid orange;
+        }
+
+        .filename-box {
+            background: #1a1a1a;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #ffa500;
+            margin: 10px 0;
+            border: 1px solid #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filename-box span:first-child {
+            color: #888;
+            font-size: 16px;
+        }
+
+        .filename-box span:last-child {
+            color: #ffa500;
+            font-weight: bold;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .button-group button {
+            flex: 1;
+        }
+
+        .status-message {
+            margin-top: 12px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        @media (max-width: 400px) {
+            .bookmark-container {
+                gap: 8px 6px;
+            }
+            .favicon-img, .favicon-text {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+            .bookmark div:last-child {
+                font-size: 10px;
+                white-space: normal;
+                word-break: break-word;
+            }
+            .sidebar {
+                width: 90vw;
+            }
+            .sidebar-grid {
+                gap: 12px 6px;
+            }
+            .action-buttons button {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+            .bookmark.edit-mode {
+                padding: 6px 2px;
+            }
+            .custom-alert {
+                min-width: 240px;
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Cabeçalho fixo sem moldura -->
-    <div class="fixed-header">
-        <div class="header-buttons-left">
-            <div class="dropdown">
-                <button class="header-btn">⚙️</button>
-                <div class="dropdown-content">
-                    <button onclick="exportBookmarks()">📤 Exportar</button>
-                    <button onclick="document.getElementById('import-file').click();">📥 Importar</button>
-                    <button onclick="clearBookmarks()">🗑️ Limpar todos</button>
-                </div>
-            </div>
-            <button class="header-btn" onclick="toggleActionButtons()" title="Editar/Excluir">✏️</button>
-            <button class="header-btn" onclick="openModal()" title="Adicionar">➕</button>
-            <button class="header-btn" onclick="toggleSidebar()" title="Sidebar">📌</button>
-        </div>
-        <div class="header-buttons-right">
-            <button class="header-btn" onclick="openGithubModal()" title="GitHub Sync">☁️</button>
-        </div>
+
+<div class="fixed-header">
+    <div class="search-wrapper">
+        <input type="text" class="search-input" id="searchInput" placeholder="Pesquisar bookmarks...">
     </div>
 
-    <!-- Container principal (grid 5 colunas) -->
-    <div class="bookmark-container" id="bookmark-container"></div>
+    <button class="add-btn-header" onclick="openModal()" title="adicionar">+</button>
 
-    <!-- Sidebar (centrada com 4 colunas) -->
-    <div id="sidebar" class="sidebar"></div>
-
-    <!-- Modal para adicionar/editar bookmark -->
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h3 style="color:orange;">➕ Bookmark</h3>
-            <div class="input-fields">
-                <input type="text" class="input-field" id="bookmark-name" placeholder="Nome" required>
-                <input type="text" class="input-field" id="bookmark-url" placeholder="https://... ou link personalizado" required>
-                <button class="submit-button" id="modalSubmitBtn" onclick="addOrUpdateBookmark()">Adicionar</button>
-            </div>
+    <div class="menu-dots" id="menuDotsWrapper">
+        <button class="dots-button" id="dotsMenuBtn" aria-label="menu">⋮</button>
+        <div class="menu-dropdown" id="menuDropdown">
+            <button onclick="exportBookmarks()">Exportar</button>
+            <button onclick="document.getElementById('import-file').click();">Importar</button>
+            <button onclick="openGistModal()">Backup Gist</button>
+            <button onclick="clearBookmarks()">Limpar todos</button>
+            <button onclick="toggleActionButtons()" id="editModeBtn">Editar / Excluir</button>
+            <button onclick="toggleSidebar()">Sidebar</button>
         </div>
     </div>
+</div>
 
-    <!-- Modal do GitHub Sync com títulos -->
-    <div id="githubModal" class="github-modal">
-        <div class="github-modal-content">
-            <span class="close" onclick="closeGithubModal()" style="float:right; cursor:pointer;">&times;</span>
-            <h3>☁️ GitHub Sync</h3>
-            
-            <div class="campo-sync">
-                <label>🔑 TOKEN GITHUB</label>
-                <input type="password" id="github-token" class="github-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
-            </div>
-            
-            <div class="campo-sync">
-                <label>📁 GIST ID</label>
-                <input type="text" id="gist-id" class="github-input" placeholder="Ex: 0cd31f7049a703eabdcda407ef354c68">
-            </div>
-            
-            <div class="campo-sync">
-                <label>📄 NOME DO FICHEIRO</label>
-                <input type="text" id="gist-filename" class="github-input" placeholder="startpage.json" value="startpage.json">
-            </div>
-            
-            <div class="modal-buttons-row">
-                <button class="modal-btn" onclick="syncBookmarksToGithub()" title="Salvar no Gist">💾</button>
-                <button class="modal-btn" onclick="loadBookmarksFromGithub()" title="Carregar do Gist">📥</button>
-            </div>
-            <div id="sync-status" class="sync-status"></div>
+<div class="bookmark-container" id="bookmark-container"></div>
+
+<div id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+        <button class="sidebar-icon-btn" onclick="openSidebarAddModal()" title="Adicionar ao sidebar">+</button>
+        <button class="sidebar-icon-btn" id="sidebarEditBtn" title="Editar itens do sidebar">✏️</button>
+        <div class="sidebar-header-spacer"></div>
+        <button class="sidebar-icon-btn" onclick="closeSidebar()" title="Fechar">✕</button>
+    </div>
+    <div class="sidebar-content">
+        <div class="sidebar-grid" id="sidebarGrid"></div>
+    </div>
+</div>
+
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h3 style="color:orange;">Bookmark</h3>
+        <div class="input-fields">
+            <input type="text" class="input-field" id="bookmark-name" placeholder="Nome" required>
+            <input type="text" class="input-field" id="bookmark-url" placeholder="https://... ou link personalizado" required>
+            <button class="submit-button" id="modalSubmitBtn" onclick="addOrUpdateBookmark()">Adicionar</button>
         </div>
     </div>
+</div>
 
-    <!-- Input file -->
-    <input type="file" id="import-file" accept=".json" onchange="importBookmarks(event)">
+<div id="sidebarAddModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeSidebarAddModal()">&times;</span>
+        <h3 style="color:orange;">Adicionar ao Sidebar</h3>
+        <div class="input-fields">
+            <input type="text" class="input-field" id="sidebar-bookmark-name" placeholder="Nome" required>
+            <input type="text" class="input-field" id="sidebar-bookmark-url" placeholder="https://... ou link personalizado" required>
+            <button class="submit-button" id="sidebarSubmitBtn" onclick="addSidebarBookmark()">Adicionar</button>
+        </div>
+    </div>
+</div>
 
-    <script>
-        // ========== VARIÁVEIS GLOBAIS ==========
+<div id="gistModal" class="modal">
+    <div class="gist-modal-content">
+        <span class="close" onclick="closeGistModal()">&times;</span>
+        <h3 style="color:orange;">GitHub Gist Backup</h3>
+        
+        <label class="gist-label">GitHub Token (opcional)</label>
+        <input type="password" class="gist-input" id="gistToken" placeholder="••••••••••••••••" autocomplete="off">
+        
+        <label class="gist-label">Gist ID (para restaurar)</label>
+        <input type="text" class="gist-input" id="gistId" placeholder="Ex: abc123def456789">
+        
+        <label class="gist-label">Nome do ficheiro</label>
+        <div class="filename-box">
+            <span>📁</span>
+            <span>startpage.json</span>
+        </div>
+        
+        <div class="button-group">
+            <button class="submit-button" onclick="uploadToGist()" style="background-color: #ff8c00;">Enviar</button>
+            <button class="submit-button" onclick="downloadFromGist()" style="background-color: #444;">Restaurar</button>
+        </div>
+        
+        <div id="gistStatus" class="status-message"></div>
+    </div>
+</div>
+
+<input type="file" id="import-file" accept=".json" onchange="importBookmarks(event)">
+
+<script>
+    (function() {
         let currentEditingBookmark = null;
-
-        // ========== INICIALIZAÇÃO ==========
-        window.addEventListener('load', function() {
-            const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
-            bookmarks.forEach(b => addBookmarkToDOM(b.name, b.url));
-            renderSidebar();
+        let currentEditingSidebarBookmark = null;
+        let isEditModeActive = false;
+        let isSidebarEditMode = false;
+        const FILENAME = "startpage.json";
+        
+        let userSidebarBookmarks = JSON.parse(localStorage.getItem('sidebar_bookmarks')) || [];
+        
+        function saveUserSidebarBookmarks() {
+            localStorage.setItem('sidebar_bookmarks', JSON.stringify(userSidebarBookmarks));
+        }
+        
+        function showAlert(message) {
+            const existingAlert = document.querySelector('.custom-alert');
+            if (existingAlert) existingAlert.remove();
             
-            // Carregar credenciais guardadas
-            const savedToken = localStorage.getItem('github_token');
-            const savedGistId = localStorage.getItem('gist_id');
-            const savedFilename = localStorage.getItem('gist_filename');
-            if (savedToken) document.getElementById('github-token').value = savedToken;
-            if (savedGistId) document.getElementById('gist-id').value = savedGistId;
-            if (savedFilename) document.getElementById('gist-filename').value = savedFilename;
-        });
-
-        // ========== FUNÇÕES DE INTERFACE ==========
-        window.toggleActionButtons = function() {
-            document.querySelectorAll('#bookmark-container .action-buttons').forEach(ab => {
-                ab.style.display = ab.style.display === 'flex' ? 'none' : 'flex';
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'custom-alert';
+            alertDiv.innerHTML = `
+                <p>${message}</p>
+                <button onclick="this.parentElement.remove()">OK</button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentElement) alertDiv.remove();
+            }, 3000);
+        }
+        
+        function showConfirm(message, onConfirm) {
+            const existingAlert = document.querySelector('.custom-alert');
+            if (existingAlert) existingAlert.remove();
+            
+            const confirmDiv = document.createElement('div');
+            confirmDiv.className = 'custom-alert';
+            confirmDiv.innerHTML = `
+                <p>${message}</p>
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <button id="confirmYes" style="background: #ff8c00;">Sim</button>
+                    <button id="confirmNo" style="background: #333;">Não</button>
+                </div>
+            `;
+            document.body.appendChild(confirmDiv);
+            
+            document.getElementById('confirmYes').onclick = () => {
+                confirmDiv.remove();
+                onConfirm(true);
+            };
+            document.getElementById('confirmNo').onclick = () => {
+                confirmDiv.remove();
+                onConfirm(false);
+            };
+        }
+        
+        function saveBookmarksToStorage(bookmarks) {
+            localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+        }
+        
+        function renderFilteredBookmarks(filterText = '') {
+            const container = document.getElementById('bookmark-container');
+            container.innerHTML = '';
+            let bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+            if (filterText.trim() !== '') {
+                const lowerFilter = filterText.toLowerCase();
+                bookmarks = bookmarks.filter(b => b.name.toLowerCase().includes(lowerFilter));
+            }
+            bookmarks.forEach(bookmark => {
+                addBookmarkToDOM(bookmark.name, bookmark.url);
             });
-        };
-
-        window.openModal = function() {
-            document.getElementById('myModal').style.display = 'block';
-        };
-
-        window.closeModal = function() {
-            document.getElementById('myModal').style.display = 'none';
-            resetInputFields();
-            currentEditingBookmark = null;
-            document.getElementById('modalSubmitBtn').innerText = 'Adicionar';
-        };
-
-        window.toggleSidebar = function() {
-            const sb = document.getElementById('sidebar');
-            sb.style.display = sb.style.display === 'flex' ? 'none' : 'flex';
-        };
-
-        window.openGithubModal = function() {
-            document.getElementById('githubModal').style.display = 'block';
-        };
-
-        window.closeGithubModal = function() {
-            document.getElementById('githubModal').style.display = 'none';
-            document.getElementById('sync-status').innerHTML = '';
-        };
-
-        // ========== CRUD BOOKMARKS ==========
-        window.addOrUpdateBookmark = function() {
-            const name = document.getElementById('bookmark-name').value.trim();
-            let url = document.getElementById('bookmark-url').value.trim();
-
-            if (!name) {
-                alert('O nome é obrigatório');
-                return;
+            if (isEditModeActive) {
+                applyEditModeToAll();
             }
-            if (!url) {
-                alert('O URL é obrigatório');
-                return;
-            }
-            
-            const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
-
-            const duplicate = bookmarks.find(b => b.name === name && 
-                (!currentEditingBookmark || currentEditingBookmark.name !== name));
-            
-            if (duplicate) {
-                alert('Já existe um bookmark com este nome');
-                return;
-            }
-
-            if (currentEditingBookmark) {
-                const index = bookmarks.findIndex(b => b.name === currentEditingBookmark.name);
-                if (index !== -1) {
-                    bookmarks[index] = { name, url };
-                    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-                    updateBookmarkInDOM(currentEditingBookmark.name, name, url);
+        }
+        
+        function applyEditModeToAll() {
+            const allBookmarks = document.querySelectorAll('#bookmark-container .bookmark');
+            allBookmarks.forEach(bookmark => {
+                if (isEditModeActive) {
+                    bookmark.classList.add('edit-mode');
+                    const actionBtns = bookmark.querySelector('.action-buttons');
+                    if (actionBtns) actionBtns.style.display = 'flex';
+                } else {
+                    bookmark.classList.remove('edit-mode');
+                    const actionBtns = bookmark.querySelector('.action-buttons');
+                    if (actionBtns) actionBtns.style.display = 'none';
                 }
-                currentEditingBookmark = null;
-                document.getElementById('modalSubmitBtn').innerText = 'Adicionar';
-            } else {
-                bookmarks.push({ name, url });
-                localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-                addBookmarkToDOM(name, url);
-            }
-
-            resetInputFields();
-            closeModal();
-            renderSidebar();
-        };
-
+            });
+        }
+        
         function addBookmarkToDOM(name, url) {
             const container = document.getElementById('bookmark-container');
-            
             const bookmarkDiv = document.createElement('div');
             bookmarkDiv.className = 'bookmark';
+            if (isEditModeActive) bookmarkDiv.classList.add('edit-mode');
             bookmarkDiv.dataset.bookmarkName = name;
-
+            bookmarkDiv.dataset.url = url;
+            
             const link = document.createElement('a');
             link.href = url;
             link.target = '_blank';
-
+            
             const faviconContainer = document.createElement('div');
-            faviconContainer.className = 'favicon-container';
+            faviconContainer.style.position = 'relative';
             
             const img = document.createElement('img');
             img.className = 'favicon-img';
             
             let isHttpUrl = false;
             let host = '';
-            
             try {
                 const parsedUrl = new URL(url);
                 if (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') {
                     isHttpUrl = true;
                     host = parsedUrl.hostname;
-                    img.src = `https://www.google.com/s2/favicons?domain=${host}&sz=32`;
+                    img.src = `https://www.google.com/s2/favicons?domain=${host}&sz=40`;
                 } else {
                     img.src = '';
                 }
             } catch {
                 img.src = '';
             }
-
+            
             const textFallback = document.createElement('div');
             textFallback.className = 'favicon-text';
             textFallback.textContent = name.charAt(0).toUpperCase();
@@ -631,7 +820,6 @@
                 textFallback.style.display = 'flex';
             } else {
                 textFallback.style.display = 'none';
-                
                 img.onerror = function() {
                     img.style.display = 'none';
                     textFallback.style.display = 'flex';
@@ -641,333 +829,611 @@
                     textFallback.style.display = 'none';
                 };
             }
-
+            
             faviconContainer.appendChild(img);
             faviconContainer.appendChild(textFallback);
-
+            
             const nameSpan = document.createElement('div');
             nameSpan.textContent = name;
-
+            
             link.appendChild(faviconContainer);
             link.appendChild(nameSpan);
-
+            
             const actionWrapper = document.createElement('div');
             actionWrapper.className = 'action-buttons';
-
+            if (isEditModeActive) actionWrapper.style.display = 'flex';
+            
             const editBtn = document.createElement('button');
-            editBtn.textContent = 'Editar';
+            editBtn.innerHTML = '✏️';
+            editBtn.title = 'Editar';
             editBtn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 editBookmark(name, url);
             };
-
+            
             const delBtn = document.createElement('button');
-            delBtn.textContent = 'Excluir';
+            delBtn.innerHTML = '🗑️';
+            delBtn.title = 'Excluir';
             delBtn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                deleteBookmark(name, bookmarkDiv);
+                deleteBookmarkFromUI(name, bookmarkDiv);
             };
-
+            
             actionWrapper.appendChild(editBtn);
             actionWrapper.appendChild(delBtn);
-
             bookmarkDiv.appendChild(link);
             bookmarkDiv.appendChild(actionWrapper);
             container.appendChild(bookmarkDiv);
         }
-
-        window.editBookmark = function(name, url) {
-            document.getElementById('bookmark-name').value = name;
-            document.getElementById('bookmark-url').value = url;
-            currentEditingBookmark = { name, url };
+        
+        function deleteBookmarkFromUI(name, element) {
+            showConfirm(`Remover "${name}"?`, (confirmed) => {
+                if (confirmed) {
+                    const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+                    const filtered = bookmarks.filter(b => b.name !== name);
+                    saveBookmarksToStorage(filtered);
+                    element.remove();
+                    const searchVal = document.getElementById('searchInput').value;
+                    renderFilteredBookmarks(searchVal);
+                }
+            });
+        }
+        
+        function editBookmark(oldName, oldUrl) {
+            if (isEditModeActive) {
+                toggleActionButtons();
+            }
+            document.getElementById('bookmark-name').value = oldName;
+            document.getElementById('bookmark-url').value = oldUrl;
+            currentEditingBookmark = { name: oldName, url: oldUrl };
             document.getElementById('modalSubmitBtn').innerText = 'Atualizar';
             openModal();
-        };
-
-        function deleteBookmark(name, element) {
-            if (!confirm(`Remover "${name}"?`)) return;
-            
-            const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
-            const filtered = bookmarks.filter(b => b.name !== name);
-            localStorage.setItem('bookmarks', JSON.stringify(filtered));
-            element.remove();
         }
-
-        function updateBookmarkInDOM(oldName, newName, newUrl) {
-            const bookmarksDOM = document.querySelectorAll('#bookmark-container .bookmark');
+        
+        window.addOrUpdateBookmark = function() {
+            let name = document.getElementById('bookmark-name').value.trim();
+            let url = document.getElementById('bookmark-url').value.trim();
+            if (!name) { showAlert('O nome é obrigatório'); return; }
+            if (!url) { showAlert('O URL é obrigatório'); return; }
             
-            for (let bm of bookmarksDOM) {
-                const nameDiv = bm.querySelector('a > div:last-child');
-                if (nameDiv && nameDiv.textContent === oldName) {
-                    nameDiv.textContent = newName;
-                    const link = bm.querySelector('a');
-                    link.href = newUrl;
-                    
-                    const img = bm.querySelector('.favicon-img');
-                    const textFallback = bm.querySelector('.favicon-text');
-                    
-                    let isHttpUrl = false;
-                    try {
-                        const parsedUrl = new URL(newUrl);
-                        if (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') {
-                            isHttpUrl = true;
-                            const host = parsedUrl.hostname;
-                            img.src = `https://www.google.com/s2/favicons?domain=${host}&sz=32`;
-                        } else {
-                            img.src = '';
-                        }
-                    } catch {
-                        img.src = '';
+            let bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+            
+            if (currentEditingBookmark) {
+                const index = bookmarks.findIndex(b => b.name === currentEditingBookmark.name);
+                if (index !== -1) {
+                    const duplicate = bookmarks.find(b => b.name === name && b.name !== currentEditingBookmark.name);
+                    if (duplicate) { showAlert('Já existe um bookmark com este nome'); return; }
+                    bookmarks[index] = { name, url };
+                    saveBookmarksToStorage(bookmarks);
+                    showAlert(`"${name}" foi atualizado`);
+                }
+                currentEditingBookmark = null;
+                document.getElementById('modalSubmitBtn').innerText = 'Adicionar';
+            } else {
+                const exists = bookmarks.some(b => b.name === name);
+                if (exists) { showAlert('Já existe um bookmark com este nome'); return; }
+                bookmarks.push({ name, url });
+                saveBookmarksToStorage(bookmarks);
+                showAlert(`"${name}" foi adicionado`);
+            }
+            
+            resetInputFields();
+            closeModal();
+            const filterText = document.getElementById('searchInput').value;
+            renderFilteredBookmarks(filterText);
+        };
+        
+        window.openSidebarAddModal = function() {
+            currentEditingSidebarBookmark = null;
+            document.getElementById('sidebar-bookmark-name').value = '';
+            document.getElementById('sidebar-bookmark-url').value = '';
+            document.getElementById('sidebarAddModal').style.display = 'flex';
+        };
+        
+        window.closeSidebarAddModal = function() {
+            document.getElementById('sidebarAddModal').style.display = 'none';
+            document.getElementById('sidebar-bookmark-name').value = '';
+            document.getElementById('sidebar-bookmark-url').value = '';
+            currentEditingSidebarBookmark = null;
+        };
+        
+        window.addSidebarBookmark = function() {
+            let name = document.getElementById('sidebar-bookmark-name').value.trim();
+            let url = document.getElementById('sidebar-bookmark-url').value.trim();
+            
+            if (!name) { showAlert('O nome é obrigatório'); return; }
+            if (!url) { showAlert('O URL é obrigatório'); return; }
+            
+            // Garantir que o URL tem protocolo se necessário
+            let finalUrl = url;
+            if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('ftp://') && !url.startsWith('file://') && !url.startsWith('mailto:') && !url.startsWith('tel:')) {
+                finalUrl = 'https://' + url;
+            }
+            
+            if (currentEditingSidebarBookmark) {
+                const index = userSidebarBookmarks.findIndex(b => b.name === currentEditingSidebarBookmark.name);
+                if (index !== -1) {
+                    userSidebarBookmarks[index] = { name: name, url: finalUrl };
+                    saveUserSidebarBookmarks();
+                    showAlert(`"${name}" foi atualizado no sidebar`);
+                }
+                currentEditingSidebarBookmark = null;
+            } else {
+                const exists = userSidebarBookmarks.some(b => b.name === name);
+                if (exists) { showAlert('Já existe um bookmark com este nome no sidebar'); return; }
+                userSidebarBookmarks.push({ name: name, url: finalUrl });
+                saveUserSidebarBookmarks();
+                showAlert(`"${name}" foi adicionado ao sidebar`);
+            }
+            
+            closeSidebarAddModal();
+            renderSidebar();
+        };
+        
+        function editSidebarBookmark(name, url) {
+            document.getElementById('sidebar-bookmark-name').value = name;
+            document.getElementById('sidebar-bookmark-url').value = url;
+            currentEditingSidebarBookmark = { name: name, url: url };
+            document.getElementById('sidebarAddModal').style.display = 'flex';
+        }
+        
+        function deleteSidebarBookmark(name, element) {
+            showConfirm(`Remover "${name}" do sidebar?`, (confirmed) => {
+                if (confirmed) {
+                    userSidebarBookmarks = userSidebarBookmarks.filter(b => b.name !== name);
+                    saveUserSidebarBookmarks();
+                    if (element && element.parentElement) {
+                        element.remove();
                     }
-                    
-                    textFallback.textContent = newName.charAt(0).toUpperCase();
-                    
-                    if (!isHttpUrl) {
-                        img.style.display = 'none';
-                        textFallback.style.display = 'flex';
-                    } else {
-                        textFallback.style.display = 'none';
-                        img.style.display = 'block';
-                        
-                        img.onerror = function() {
-                            img.style.display = 'none';
-                            textFallback.style.display = 'flex';
-                        };
-                        img.onload = function() {
-                            img.style.display = 'block';
-                            textFallback.style.display = 'none';
-                        };
-                    }
-                    
-                    bm.dataset.bookmarkName = newName;
-                    
-                    const editBtn = bm.querySelector('.action-buttons button:first-child');
-                    const delBtn = bm.querySelector('.action-buttons button:last-child');
-                    
-                    editBtn.onclick = (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        editBookmark(newName, newUrl);
-                    };
-                    
-                    delBtn.onclick = (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        deleteBookmark(newName, bm);
-                    };
-                    
-                    break;
+                }
+            });
+        }
+        
+        function toggleSidebarEditMode() {
+            isSidebarEditMode = !isSidebarEditMode;
+            const editBtn = document.getElementById('sidebarEditBtn');
+            if (editBtn) {
+                if (isSidebarEditMode) {
+                    editBtn.style.background = '#ffa500';
+                    editBtn.style.color = '#000';
+                    editBtn.innerHTML = '✓';
+                } else {
+                    editBtn.style.background = '#222';
+                    editBtn.style.color = '#fff';
+                    editBtn.innerHTML = '✏️';
                 }
             }
+            renderSidebar();
         }
-
+        
         function resetInputFields() {
             document.getElementById('bookmark-name').value = '';
             document.getElementById('bookmark-url').value = '';
         }
-
-        // ========== EXPORTAR/IMPORTAR ==========
+        
+        window.toggleActionButtons = function() {
+            isEditModeActive = !isEditModeActive;
+            const allBookmarks = document.querySelectorAll('#bookmark-container .bookmark');
+            const editModeBtn = document.getElementById('editModeBtn');
+            
+            allBookmarks.forEach(bookmark => {
+                if (isEditModeActive) {
+                    bookmark.classList.add('edit-mode');
+                    const actionBtns = bookmark.querySelector('.action-buttons');
+                    if (actionBtns) actionBtns.style.display = 'flex';
+                } else {
+                    bookmark.classList.remove('edit-mode');
+                    const actionBtns = bookmark.querySelector('.action-buttons');
+                    if (actionBtns) actionBtns.style.display = 'none';
+                }
+            });
+            
+            if (editModeBtn) {
+                editModeBtn.innerHTML = isEditModeActive ? 'Sair Edição' : 'Editar / Excluir';
+            }
+            
+            const dropdown = document.getElementById('menuDropdown');
+            dropdown.classList.remove('show');
+        };
+        
+        window.openModal = function() {
+            document.getElementById('myModal').style.display = 'flex';
+        };
+        window.closeModal = function() {
+            document.getElementById('myModal').style.display = 'none';
+            resetInputFields();
+            currentEditingBookmark = null;
+            document.getElementById('modalSubmitBtn').innerText = 'Adicionar';
+        };
+        
+        window.closeSidebar = function() {
+            document.getElementById('sidebar').style.display = 'none';
+            if (isSidebarEditMode) {
+                isSidebarEditMode = false;
+                const editBtn = document.getElementById('sidebarEditBtn');
+                if (editBtn) {
+                    editBtn.style.background = '#222';
+                    editBtn.style.color = '#fff';
+                    editBtn.innerHTML = '✏️';
+                }
+            }
+        };
+        
+        function showGistMessage(success, message) {
+            const statusDiv = document.getElementById('gistStatus');
+            if (success) {
+                statusDiv.innerHTML = 'OK';
+                statusDiv.style.color = '#00ff88';
+            } else {
+                statusDiv.innerHTML = 'Erro: ' + message;
+                statusDiv.style.color = '#ff6666';
+            }
+            setTimeout(() => {
+                if (statusDiv.innerHTML === 'OK' || statusDiv.innerHTML.startsWith('Erro')) {
+                    statusDiv.style.opacity = '0.5';
+                    setTimeout(() => {
+                        statusDiv.innerHTML = '';
+                        statusDiv.style.opacity = '1';
+                    }, 2000);
+                }
+            }, 3000);
+        }
+        
+        window.uploadToGist = async function() {
+            const token = document.getElementById('gistToken').value.trim();
+            const gistId = document.getElementById('gistId').value.trim();
+            const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+            
+            if (token) localStorage.setItem('gist_token', token);
+            if (gistId) localStorage.setItem('gist_id', gistId);
+            
+            const fileContent = JSON.stringify(bookmarks, null, 2);
+            
+            try {
+                let method = 'POST';
+                let url = 'https://api.github.com/gists';
+                let gistData = {
+                    description: `Bookmarks backup - ${new Date().toLocaleString()}`,
+                    public: false,
+                    files: {
+                        [FILENAME]: {
+                            content: fileContent
+                        }
+                    }
+                };
+                
+                if (gistId && gistId.length > 0) {
+                    method = 'PATCH';
+                    url = `https://api.github.com/gists/${gistId}`;
+                    gistData = {
+                        description: `Bookmarks backup - ${new Date().toLocaleString()}`,
+                        files: {
+                            [FILENAME]: {
+                                content: fileContent
+                            }
+                        }
+                    };
+                }
+                
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/vnd.github.v3+json'
+                };
+                if (token) {
+                    headers['Authorization'] = `token ${token}`;
+                }
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: headers,
+                    body: JSON.stringify(gistData)
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Falha no upload');
+                }
+                
+                const gist = await response.json();
+                const newGistId = gist.id;
+                
+                document.getElementById('gistId').value = newGistId;
+                localStorage.setItem('gist_id', newGistId);
+                
+                showGistMessage(true, 'OK');
+                
+            } catch (err) {
+                console.error(err);
+                showGistMessage(false, err.message || 'Falha no upload');
+            }
+        };
+        
+        window.downloadFromGist = async function() {
+            const token = document.getElementById('gistToken').value.trim();
+            let gistId = document.getElementById('gistId').value.trim();
+            
+            if (!gistId) {
+                showGistMessage(false, 'Gist ID necessário');
+                return;
+            }
+            
+            localStorage.setItem('gist_id', gistId);
+            if (token) localStorage.setItem('gist_token', token);
+            
+            try {
+                const headers = { 'Accept': 'application/vnd.github.v3+json' };
+                if (token) {
+                    headers['Authorization'] = `token ${token}`;
+                }
+                
+                const response = await fetch(`https://api.github.com/gists/${gistId}`, { headers });
+                if (!response.ok) {
+                    throw new Error('Gist não encontrado');
+                }
+                
+                const gist = await response.json();
+                const files = gist.files;
+                
+                let bookmarksData = null;
+                if (files[FILENAME]) {
+                    bookmarksData = files[FILENAME].content;
+                } else {
+                    for (let filename in files) {
+                        if (filename.endsWith('.json')) {
+                            bookmarksData = files[filename].content;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!bookmarksData) {
+                    throw new Error(`Ficheiro ${FILENAME} não encontrado`);
+                }
+                
+                const bookmarks = JSON.parse(bookmarksData);
+                if (!Array.isArray(bookmarks)) throw new Error('Formato inválido');
+                
+                bookmarks.forEach(item => {
+                    if (!item.name || !item.url) throw new Error('Bookmark inválido');
+                });
+                
+                localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+                renderFilteredBookmarks(document.getElementById('searchInput').value);
+                
+                showGistMessage(true, 'OK');
+                setTimeout(() => {
+                    closeGistModal();
+                }, 1500);
+                
+            } catch (err) {
+                console.error(err);
+                showGistMessage(false, err.message);
+            }
+        };
+        
         window.exportBookmarks = function() {
             const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+            const dataAtual = new Date();
+            const dataStr = `${dataAtual.getFullYear()}-${String(dataAtual.getMonth()+1).padStart(2,'0')}-${String(dataAtual.getDate()).padStart(2,'0')}_${String(dataAtual.getHours()).padStart(2,'0')}-${String(dataAtual.getMinutes()).padStart(2,'0')}`;
+            const nomeFicheiro = `sidebarFIL_${dataStr}.json`;
+            
             const blob = new Blob([JSON.stringify(bookmarks, null, 2)], { type: 'application/json' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = 'bookmarks.json';
+            a.download = nomeFicheiro;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(a.href);
+            const dropdown = document.getElementById('menuDropdown');
+            dropdown.classList.remove('show');
+            showAlert('Bookmarks exportados');
         };
-
+        
         window.clearBookmarks = function() {
-            if (confirm('Apagar TODOS os bookmarks?')) {
-                localStorage.removeItem('bookmarks');
-                document.getElementById('bookmark-container').innerHTML = '';
-            }
+            showConfirm('Apagar todos os bookmarks?', (confirmed) => {
+                if (confirmed) {
+                    localStorage.removeItem('bookmarks');
+                    if (isEditModeActive) {
+                        isEditModeActive = false;
+                        const editModeBtn = document.getElementById('editModeBtn');
+                        if (editModeBtn) editModeBtn.innerHTML = 'Editar / Excluir';
+                    }
+                    renderFilteredBookmarks('');
+                    document.getElementById('searchInput').value = '';
+                }
+            });
+            const dropdown = document.getElementById('menuDropdown');
+            dropdown.classList.remove('show');
         };
-
+        
         window.importBookmarks = function(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
                     const imported = JSON.parse(e.target.result);
-                    if (!Array.isArray(imported)) throw new Error('Formato inválido');
-                    
-                    imported.forEach(item => {
-                        if (!item.name || !item.url) throw new Error('Item inválido');
-                    });
-
+                    if (!Array.isArray(imported)) throw new Error();
+                    imported.forEach(item => { if (!item.name || !item.url) throw new Error(); });
                     localStorage.setItem('bookmarks', JSON.stringify(imported));
-                    document.getElementById('bookmark-container').innerHTML = '';
-                    imported.forEach(b => addBookmarkToDOM(b.name, b.url));
-                    
-                    alert('Importado com sucesso!');
+                    if (isEditModeActive) {
+                        isEditModeActive = false;
+                        const editModeBtn = document.getElementById('editModeBtn');
+                        if (editModeBtn) editModeBtn.innerHTML = 'Editar / Excluir';
+                    }
+                    const filterText = document.getElementById('searchInput').value;
+                    renderFilteredBookmarks(filterText);
+                    showAlert('Importado com sucesso');
                 } catch (err) {
-                    alert('Erro: ficheiro JSON inválido');
+                    showAlert('Erro: ficheiro inválido');
                 } finally {
                     event.target.value = '';
                 }
             };
             reader.readAsText(file);
+            const dropdown = document.getElementById('menuDropdown');
+            dropdown.classList.remove('show');
         };
-
-        // ========== SIDEBAR ==========
+        
+        window.openGistModal = function() {
+            const savedToken = localStorage.getItem('gist_token') || '';
+            const savedGistId = localStorage.getItem('gist_id') || '';
+            document.getElementById('gistToken').value = savedToken;
+            document.getElementById('gistId').value = savedGistId;
+            document.getElementById('gistStatus').innerHTML = '';
+            document.getElementById('gistModal').style.display = 'flex';
+            const dropdown = document.getElementById('menuDropdown');
+            dropdown.classList.remove('show');
+        };
+        
+        window.closeGistModal = function() {
+            document.getElementById('gistModal').style.display = 'none';
+            document.getElementById('gistStatus').innerHTML = '';
+        };
+        
         function renderSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.innerHTML = '';
-
-            const gridContainer = document.createElement('div');
-            gridContainer.className = 'sidebar-grid';
-
-            const preset = [
-                { name: 'bookmarkhub', url: 'https://chromewebstore.google.com/detail/bookmarkhub-sync-bookmark/fohimdklhhcpcnpmmichieidclgfdmol' },
-                { name: 'crx', url: 'https://chromewebstore.google.com/detail/crx-extractordownloader/ajkhmmldknmfjnmeedkbkkojgobmljda' },
-                { name: 'tradutor', url: 'https://chromewebstore.google.com/detail/twp-translate-beta/gkkkcomfmldkigajkmljnbpiajbpbgdg' },
-                { name: 'uBlock', url: 'https://chromewebstore.google.com/detail/ublock-origin-lite/ddkjiahejlhfcafbddmgiahcphecmpfh' },
-                { name: 'VBookmarks', url: 'https://chromewebstore.google.com/detail/vbookmarks/odhjcodnoebmndcihdedenkmdmklpihb' }
-            ];
-
-            preset.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'bookmark';
-                
-                let host = '';
-                try {
-                    host = new URL(item.url).hostname;
-                } catch {
-                    host = '';
-                }
-
-                div.innerHTML = `
-                    <a href="${item.url}" target="_blank">
-                        <div class="favicon-container" style="position:relative;">
-                            <img class="favicon-img" src="https://www.google.com/s2/favicons?domain=${host}&sz=32" 
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                                 onload="this.style.display='block'; this.nextElementSibling.style.display='none';">
-                            <div class="favicon-text" style="display:none;">${item.name.charAt(0).toUpperCase()}</div>
-                        </div>
-                        <div>${item.name}</div>
-                    </a>`;
-                
-                gridContainer.appendChild(div);
-            });
-
-            sidebar.appendChild(gridContainer);
-        }
-
-        // ========== GITHUB SYNC ==========
-        async function syncBookmarksToGithub() {
-            const token = document.getElementById('github-token').value.trim();
-            const gistId = document.getElementById('gist-id').value.trim();
-            const filename = document.getElementById('gist-filename').value.trim();
-            const statusDiv = document.getElementById('sync-status');
+            const sidebarGrid = document.getElementById('sidebarGrid');
+            if (!sidebarGrid) return;
+            sidebarGrid.innerHTML = '';
             
-            if (!token || !gistId || !filename) {
-                statusDiv.innerHTML = '❌ Token, Gist ID e nome do ficheiro são obrigatórios';
-                return;
+            if (userSidebarBookmarks.length === 0) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.style.gridColumn = '1 / -1';
+                emptyDiv.style.textAlign = 'center';
+                emptyDiv.style.padding = '20px';
+                emptyDiv.style.color = '#666';
+                emptyDiv.style.fontSize = '12px';
+                emptyDiv.innerHTML = 'Nenhum bookmark no sidebar<br>Clique no + para adicionar';
+                sidebarGrid.appendChild(emptyDiv);
+            } else {
+                userSidebarBookmarks.forEach((item) => {
+                    const div = document.createElement('div');
+                    div.className = 'bookmark';
+                    let host = '';
+                    try { host = new URL(item.url).hostname; } catch(e) { host = ''; }
+                    
+                    if (isSidebarEditMode) {
+                        div.innerHTML = `
+                            <a href="${item.url}" target="_blank">
+                                <div style="position:relative;">
+                                    <img class="favicon-img" src="https://www.google.com/s2/favicons?domain=${host}&sz=36" 
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                         onload="this.style.display='block'; this.nextElementSibling.style.display='none';">
+                                    <div class="favicon-text" style="display:none;">${item.name.charAt(0).toUpperCase()}</div>
+                                </div>
+                                <div>${item.name}</div>
+                            </a>
+                            <div style="display: flex; gap: 8px; margin-top: 6px;">
+                                <button class="sidebar-edit-btn" data-name="${item.name.replace(/'/g, "\\'")}" data-url="${item.url.replace(/'/g, "\\'")}" style="background:#222;border:1px solid #555;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;">✏️</button>
+                                <button class="sidebar-remove-btn" data-name="${item.name.replace(/'/g, "\\'")}" style="background:#222;border:1px solid #555;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;">🗑️</button>
+                            </div>
+                        `;
+                    } else {
+                        div.innerHTML = `
+                            <a href="${item.url}" target="_blank">
+                                <div style="position:relative;">
+                                    <img class="favicon-img" src="https://www.google.com/s2/favicons?domain=${host}&sz=36" 
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                         onload="this.style.display='block'; this.nextElementSibling.style.display='none';">
+                                    <div class="favicon-text" style="display:none;">${item.name.charAt(0).toUpperCase()}</div>
+                                </div>
+                                <div>${item.name}</div>
+                            </a>
+                        `;
+                    }
+                    sidebarGrid.appendChild(div);
+                });
             }
             
-            localStorage.setItem('github_token', token);
-            localStorage.setItem('gist_id', gistId);
-            localStorage.setItem('gist_filename', filename);
+            document.querySelectorAll('.sidebar-edit-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    const name = btn.getAttribute('data-name');
+                    const url = btn.getAttribute('data-url');
+                    editSidebarBookmark(name, url);
+                };
+            });
             
-            const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
-            const content = JSON.stringify(bookmarks, null, 2);
-            
-            statusDiv.innerHTML = '⏳ A enviar...';
-            
-            try {
-                const response = await fetch(`https://api.github.com/gists/${gistId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        files: {
-                            [filename]: {
-                                content: content
-                            }
-                        }
-                    })
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `HTTP ${response.status}`);
+            document.querySelectorAll('.sidebar-remove-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    const name = btn.getAttribute('data-name');
+                    const bookmarkDiv = btn.closest('.bookmark');
+                    deleteSidebarBookmark(name, bookmarkDiv);
+                };
+            });
+        }
+        
+        window.toggleSidebar = function() {
+            const sb = document.getElementById('sidebar');
+            if (sb.style.display === 'flex') {
+                sb.style.display = 'none';
+                if (isSidebarEditMode) {
+                    isSidebarEditMode = false;
+                    const editBtn = document.getElementById('sidebarEditBtn');
+                    if (editBtn) {
+                        editBtn.style.background = '#222';
+                        editBtn.style.color = '#fff';
+                        editBtn.innerHTML = '✏️';
+                    }
                 }
-                
-                statusDiv.innerHTML = '✅ Salvos com sucesso!';
-                setTimeout(() => {
-                    closeGithubModal();
-                }, 1000);
-                
-            } catch (error) {
-                statusDiv.innerHTML = `❌ Erro: ${error.message}`;
+            } else {
+                renderSidebar();
+                sb.style.display = 'flex';
+                const dropdown = document.getElementById('menuDropdown');
+                dropdown.classList.remove('show');
+            }
+        };
+        
+        function closeDropdownOnClickOutside(e) {
+            const wrapper = document.getElementById('menuDotsWrapper');
+            const dropdown = document.getElementById('menuDropdown');
+            if (wrapper && !wrapper.contains(e.target) && dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
             }
         }
         
-        async function loadBookmarksFromGithub() {
-            const token = document.getElementById('github-token').value.trim();
-            const gistId = document.getElementById('gist-id').value.trim();
-            const filename = document.getElementById('gist-filename').value.trim();
-            const statusDiv = document.getElementById('sync-status');
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value;
+                renderFilteredBookmarks(term);
+            });
+        }
+        
+        function init() {
+            renderFilteredBookmarks('');
+            renderSidebar();
+            setupSearch();
             
-            if (!token || !gistId || !filename) {
-                statusDiv.innerHTML = '❌ Token, Gist ID e nome do ficheiro são obrigatórios';
-                return;
-            }
+            const dotsBtn = document.getElementById('dotsMenuBtn');
+            const menuDropdown = document.getElementById('menuDropdown');
+            dotsBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menuDropdown.classList.toggle('show');
+            });
+            document.addEventListener('click', closeDropdownOnClickOutside);
             
-            localStorage.setItem('github_token', token);
-            localStorage.setItem('gist_id', gistId);
-            localStorage.setItem('gist_filename', filename);
+            const modal = document.getElementById('myModal');
+            const gistModal = document.getElementById('gistModal');
+            const sidebarAddModal = document.getElementById('sidebarAddModal');
+            window.onclick = function(event) {
+                if (event.target === modal) closeModal();
+                if (event.target === gistModal) closeGistModal();
+                if (event.target === sidebarAddModal) closeSidebarAddModal();
+            };
             
-            statusDiv.innerHTML = '⏳ A carregar...';
-            
-            try {
-                const response = await fetch(`https://api.github.com/gists/${gistId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `HTTP ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.files && data.files[filename]) {
-                    const content = data.files[filename].content;
-                    const bookmarks = JSON.parse(content);
-                    
-                    if (Array.isArray(bookmarks)) {
-                        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-                        document.getElementById('bookmark-container').innerHTML = '';
-                        bookmarks.forEach(b => addBookmarkToDOM(b.name, b.url));
-                        statusDiv.innerHTML = '✅ Carregados com sucesso!';
-                        setTimeout(() => {
-                            closeGithubModal();
-                        }, 1000);
-                    } else {
-                        throw new Error('Formato inválido');
-                    }
-                } else {
-                    statusDiv.innerHTML = `❌ "${filename}" não encontrado`;
-                }
-                
-            } catch (error) {
-                statusDiv.innerHTML = `❌ Erro: ${error.message}`;
+            const sidebarEditBtn = document.getElementById('sidebarEditBtn');
+            if (sidebarEditBtn) {
+                sidebarEditBtn.onclick = toggleSidebarEditMode;
             }
         }
-    </script>
+        
+        init();
+    })();
+</script>
 </body>
 </html>
