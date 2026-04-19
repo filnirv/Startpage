@@ -457,7 +457,13 @@
             gap: 10px;
         }
 
-        .back-btn, .batch-mode-btn {
+        .folder-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .back-btn, .batch-mode-btn, .add-folder-link-btn {
             background: #333;
             border: none;
             border-radius: 8px;
@@ -466,10 +472,24 @@
             color: #fff;
             font-size: 0.8rem;
             transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        .back-btn:hover, .batch-mode-btn:hover {
+        .back-btn:hover, .batch-mode-btn:hover, .add-folder-link-btn:hover {
             background: #555;
+            transform: scale(1.02);
+        }
+
+        .add-folder-link-btn {
+            background: #ffd966;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .add-folder-link-btn:hover {
+            background: #ffed4a;
         }
 
         .batch-mode-btn.active {
@@ -670,6 +690,21 @@
                 padding: 4px 10px;
                 font-size: 0.7rem;
             }
+            .folder-actions {
+                gap: 5px;
+            }
+            .back-btn, .batch-mode-btn, .add-folder-link-btn {
+                padding: 5px 10px;
+                font-size: 0.7rem;
+            }
+            .add-folder-link-btn span {
+                display: none;
+            }
+            .add-folder-link-btn {
+                width: 32px;
+                padding: 5px;
+                justify-content: center;
+            }
         }
 
         @media (max-width: 450px) {
@@ -731,7 +766,7 @@
     <div class="header">
         <div class="search-container">
             <div class="search-wrapper">
-                <input type="text" id="searchBox" placeholder="🔍 Pesquisar..." disabled>
+                <input type="text" id="searchBox" placeholder="🔍 Pesquisar em pastas e sites..." disabled>
                 <button id="clearSearchBtn" class="clear-search" title="Limpar pesquisa">✕</button>
             </div>
         </div>
@@ -1072,7 +1107,6 @@
             }
             atualizarBatchCount();
             
-            // Atualizar visual do checkbox
             const checkbox = document.querySelector(`.batch-checkbox[data-key="${key}"]`);
             if (checkbox) checkbox.checked = selectedItems.has(key);
         }
@@ -1215,12 +1249,41 @@
             
             let pastasFiltradas = dados.pastas;
             let linksFiltrados = dados.linksRaiz;
+            
             if (searchTerm) {
                 pastasFiltradas = dados.pastas.filter(p => p.nome.toLowerCase().includes(searchTerm));
                 linksFiltrados = dados.linksRaiz.filter(l => l.nome.toLowerCase().includes(searchTerm));
+                
+                const linksDePastas = [];
+                for (const pasta of dados.pastas) {
+                    for (const link of pasta.links) {
+                        if (link.nome.toLowerCase().includes(searchTerm)) {
+                            linksDePastas.push({
+                                ...link,
+                                pastaOrigem: pasta.nome,
+                                pastaIndex: dados.pastas.findIndex(p => p === pasta)
+                            });
+                        }
+                    }
+                }
+                
+                if (linksDePastas.length > 0) {
+                    for (const link of linksDePastas) {
+                        linksFiltrados.push({
+                            nome: link.nome,
+                            url: link.url,
+                            isFromFolder: true,
+                            originalNome: link.nome,
+                            pastaOrigem: link.pastaOrigem,
+                            pastaIndex: link.pastaIndex
+                        });
+                    }
+                }
             }
             
-            if (pastasFiltradas.length === 0) {
+            if (pastasFiltradas.length === 0 && searchTerm && linksFiltrados.length === 0) {
+                foldersContainer.innerHTML = '<div class="empty-message" style="grid-column:1/-1;">🔍 Nenhum resultado encontrado</div>';
+            } else if (pastasFiltradas.length === 0) {
                 foldersContainer.innerHTML = '';
             } else {
                 let foldersHtml = '';
@@ -1248,17 +1311,35 @@
                 let sitesHtml = '';
                 for (let i = 0; i < linksFiltrados.length; i++) {
                     const link = linksFiltrados[i];
-                    const originalIndex = dados.linksRaiz.findIndex(l => l === link);
+                    let originalIndex;
+                    let isFromFolder = link.isFromFolder || false;
+                    
+                    if (isFromFolder) {
+                        const pastaEncontrada = dados.pastas[link.pastaIndex];
+                        if (pastaEncontrada) {
+                            const idx = pastaEncontrada.links.findIndex(l => l.nome === link.originalNome && l.url === link.url);
+                            originalIndex = idx !== -1 ? idx : i;
+                        } else {
+                            originalIndex = i;
+                        }
+                    } else {
+                        originalIndex = dados.linksRaiz.findIndex(l => l === link);
+                        if (originalIndex === -1) originalIndex = i;
+                    }
+                    
                     const faviconUrl = getFaviconUrl(link.url);
-                    const key = `link_root_${originalIndex}`;
+                    const key = isFromFolder ? `link_folder_${link.pastaIndex}_${originalIndex}` : `link_root_${originalIndex}`;
+                    const displayName = isFromFolder ? link.originalNome : link.nome;
+                    const pastaHint = isFromFolder ? ` 📁${link.pastaOrigem}` : '';
+                    
                     sitesHtml += `
-                        <div class="site-icon" data-link-index="${originalIndex}" data-url="${escapeHtml(link.url)}">
+                        <div class="site-icon" data-link-index="${originalIndex}" data-url="${escapeHtml(link.url)}" data-is-from-folder="${isFromFolder}" data-pasta-origem="${link.pastaOrigem || ''}" data-pasta-index="${link.pastaIndex || ''}">
                             <input type="checkbox" class="batch-checkbox" data-key="${key}" data-type="link" data-id="${originalIndex}">
                             <div class="site-circle">
                                 <img class="favicon" src="${faviconUrl}" alt="" onerror="this.style.display='none'; this.parentElement.querySelector('.favicon-placeholder')?.style.setProperty('display', 'flex');">
-                                <div class="favicon-placeholder" style="display: none;">${escapeHtml(link.nome.charAt(0).toUpperCase())}</div>
+                                <div class="favicon-placeholder" style="display: none;">${escapeHtml(displayName.charAt(0).toUpperCase())}</div>
                             </div>
-                            <div class="site-name">${escapeHtml(link.nome)}</div>
+                            <div class="site-name" title="${escapeHtml(displayName)}${pastaHint}">${escapeHtml(displayName)}${pastaHint}</div>
                             <div class="icon-actions-btn" data-type="link" data-id="${originalIndex}" data-parent="root">⋮</div>
                         </div>
                     `;
@@ -1266,7 +1347,6 @@
                 sitesContainer.innerHTML = sitesHtml;
             }
             
-            // Event listeners
             document.querySelectorAll('.folder-icon').forEach(el => {
                 const folderDiv = el.querySelector('.folder-circle');
                 if (folderDiv) {
@@ -1285,7 +1365,16 @@
                     siteDiv.addEventListener('click', (e) => {
                         if (!editMode && !batchMode && !e.target.classList.contains('batch-checkbox')) {
                             const url = el.dataset.url;
-                            if (url) window.open(url, '_blank');
+                            const isFromFolder = el.dataset.isFromFolder === 'true';
+                            const pastaOrigem = el.dataset.pastaOrigem;
+                            const pastaIndex = el.dataset.pastaIndex;
+                            
+                            if (url) {
+                                if (isFromFolder && pastaOrigem) {
+                                    mostrarMensagem('🔍 Navegação', `A abrir "${el.querySelector('.site-name')?.textContent.replace(/📁.*$/, '').trim() || 'site'}" da pasta "${pastaOrigem}"`, 'info', 1500);
+                                }
+                                window.open(url, '_blank');
+                            }
                         }
                     });
                 }
@@ -1357,18 +1446,14 @@
                     <div class="folder-title-large">
                         <span>📁</span> ${escapeHtml(pasta.nome)}
                     </div>
-                    <div>
-                        <button class="batch-mode-btn" id="batchModeInsideBtn">${batchMode ? '✅ Sair Batch' : '📋 Modo Batch'}</button>
+                    <div class="folder-actions">
+                        <button class="add-folder-link-btn" id="addLinkInsideFolderBtn" title="Adicionar site a esta pasta">+ <span>Adicionar</span></button>
+                        <button class="batch-mode-btn" id="batchModeInsideBtn">${batchMode ? '✅ Sair Batch' : '📋 Batch'}</button>
                         <button class="back-btn" id="backToRoot">← Voltar</button>
                     </div>
                 </div>
-                <div class="add-link-bar">
-                    <input type="text" id="inlineLinkName" placeholder="Nome do site">
-                    <input type="text" id="inlineLinkUrl" placeholder="URL">
-                    <button id="inlineAddLink">+ Adicionar</button>
-                </div>
                 <div class="sites-grid" id="sitesGridPasta">
-                    ${sitesHtml || '<div class="empty-message" style="grid-column:1/-1;">Nenhum site nesta pasta</div>'}
+                    ${sitesHtml || '<div class="empty-message" style="grid-column:1/-1;">✨ Nenhum site nesta pasta. Clique em "+ Adicionar" para começar ✨</div>'}
                 </div>
             `;
             
@@ -1387,17 +1472,21 @@
                 abrirPasta(index);
             };
             
-            document.getElementById('inlineAddLink').onclick = () => {
-                const nome = document.getElementById('inlineLinkName').value.trim();
-                const url = document.getElementById('inlineLinkUrl').value.trim();
-                if (nome && url && (url.startsWith('http://') || url.startsWith('https://'))) {
-                    dados.pastas[pastaAtiva].links.push({ nome, url });
-                    guardarDados();
-                    abrirPasta(pastaAtiva);
-                    mostrarMensagem('Adicionado', `"${nome}" adicionado!`, 'success', 1500);
-                } else {
-                    mostrarMensagem('Erro', 'Preencha nome e URL válida!', 'warning', 1500);
-                }
+            document.getElementById('addLinkInsideFolderBtn').onclick = () => {
+                // Abrir modal para adicionar link diretamente na pasta atual
+                const select = document.getElementById('folderSelect');
+                select.innerHTML = `<option value="${index}">📁 ${escapeHtml(pasta.nome)} (atual)</option><option value="-1">Raiz (sem pasta)</option>`;
+                dados.pastas.forEach((p, i) => {
+                    if (i !== index) {
+                        select.innerHTML += `<option value="${i}">📁 ${escapeHtml(p.nome)}</option>`;
+                    }
+                });
+                document.getElementById('newLinkName').value = '';
+                document.getElementById('newLinkUrl').value = '';
+                document.getElementById('addLinkModal').classList.add('show');
+                
+                // Forçar seleção da pasta atual
+                select.value = index.toString();
             };
             
             document.querySelectorAll('#sitesGridPasta .site-icon').forEach(el => {
@@ -1548,11 +1637,16 @@
         function adicionarLink(nome, url, pastaIndex) {
             if (pastaIndex === -1) {
                 dados.linksRaiz.push({ nome, url });
+                renderizar();
             } else {
                 dados.pastas[pastaIndex].links.push({ nome, url });
+                if (pastaAtiva === pastaIndex) {
+                    abrirPasta(pastaAtiva);
+                } else {
+                    renderizar();
+                }
             }
             guardarDados();
-            renderizar();
             mostrarMensagem('Site Adicionado', `"${nome}" adicionado!`, 'success', 1500);
         }
         
@@ -1622,7 +1716,6 @@
         }
         
         function exportarJSON() {
-            // Exporta a estrutura COMPLETA: pastas com seus links e links da raiz
             const exportData = {
                 pastas: dados.pastas.map(pasta => ({
                     nome: pasta.nome,
@@ -1637,7 +1730,6 @@
             try {
                 const data = JSON.parse(jsonContent);
                 
-                // Verifica se é o novo formato completo (com pastas)
                 if (data.pastas !== undefined && data.linksRaiz !== undefined) {
                     dados.pastas = data.pastas.map(pasta => ({
                         nome: pasta.nome,
@@ -1650,7 +1742,6 @@
                     return true;
                 }
                 
-                // Formato antigo (apenas array de links) - compatibilidade
                 if (Array.isArray(data)) {
                     const novosLinks = [];
                     for (const item of data) {
@@ -1796,7 +1887,6 @@
                 return;
             }
             
-            // SEMPRE exportar em JSON completo para preservar pastas
             const content = exportarJSON();
             const filename = gistConfig.filename.endsWith('.json') ? gistConfig.filename : 'startpage.json';
             
@@ -2098,9 +2188,14 @@
                 { nome: "Tools", links: [
                     { nome: "Google", url: "https://google.com" },
                     { nome: "GitHub", url: "https://github.com" },
-                    { nome: "Stack", url: "https://stackoverflow.com" },
+                    { nome: "Stack Overflow", url: "https://stackoverflow.com" },
                     { nome: "ChatGPT", url: "https://chat.openai.com" },
                     { nome: "DeepL", url: "https://deepl.com" }
+                ]},
+                { nome: "Produtividade", links: [
+                    { nome: "Trello", url: "https://trello.com" },
+                    { nome: "Notion", url: "https://notion.so" },
+                    { nome: "Evernote", url: "https://evernote.com" }
                 ]}
             ];
             dados.linksRaiz = [
@@ -2108,7 +2203,9 @@
                 { nome: "Drive", url: "https://drive.google.com" },
                 { nome: "Calendar", url: "https://calendar.google.com" },
                 { nome: "Maps", url: "https://maps.google.com" },
-                { nome: "Translate", url: "https://translate.google.com" }
+                { nome: "Translate", url: "https://translate.google.com" },
+                { nome: "Fast", url: "https://fast.com/" },
+                { nome: "4pda", url: "https://4pda.to/forum/index.php?showforum=317" }
             ];
             guardarDados();
         }
