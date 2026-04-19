@@ -1621,32 +1621,53 @@
             };
         }
         
+        function exportarJSON() {
+            // Exporta a estrutura COMPLETA: pastas com seus links e links da raiz
+            const exportData = {
+                pastas: dados.pastas.map(pasta => ({
+                    nome: pasta.nome,
+                    links: pasta.links.map(link => ({ nome: link.nome, url: link.url }))
+                })),
+                linksRaiz: dados.linksRaiz.map(link => ({ nome: link.nome, url: link.url }))
+            };
+            return JSON.stringify(exportData, null, 2);
+        }
+        
         function importarJSON(jsonContent) {
             try {
-                const links = JSON.parse(jsonContent);
-                if (!Array.isArray(links)) {
-                    throw new Error('JSON deve ser um array de links');
+                const data = JSON.parse(jsonContent);
+                
+                // Verifica se é o novo formato completo (com pastas)
+                if (data.pastas !== undefined && data.linksRaiz !== undefined) {
+                    dados.pastas = data.pastas.map(pasta => ({
+                        nome: pasta.nome,
+                        links: (pasta.links || []).map(link => ({ nome: link.nome, url: link.url }))
+                    }));
+                    dados.linksRaiz = (data.linksRaiz || []).map(link => ({ nome: link.nome, url: link.url }));
+                    guardarDados();
+                    renderizar();
+                    mostrarMensagem('Importado', `${dados.pastas.length} pastas e ${dados.linksRaiz.length} sites importados!`, 'success', 3000);
+                    return true;
                 }
                 
-                const novosLinks = [];
-                for (const item of links) {
-                    if (item.name && item.url) {
-                        novosLinks.push({ nome: item.name, url: item.url });
-                    } else if (item.nome && item.url) {
-                        novosLinks.push({ nome: item.nome, url: item.url });
+                // Formato antigo (apenas array de links) - compatibilidade
+                if (Array.isArray(data)) {
+                    const novosLinks = [];
+                    for (const item of data) {
+                        if (item.name && item.url) {
+                            novosLinks.push({ nome: item.name, url: item.url });
+                        } else if (item.nome && item.url) {
+                            novosLinks.push({ nome: item.nome, url: item.url });
+                        }
                     }
+                    dados.linksRaiz.push(...novosLinks);
+                    guardarDados();
+                    renderizar();
+                    mostrarMensagem('Importado', `${novosLinks.length} sites importados do JSON!`, 'success', 3000);
+                    return true;
                 }
                 
-                if (novosLinks.length === 0) {
-                    mostrarMensagem('Erro', 'Nenhum link válido encontrado no JSON', 'error', 3000);
-                    return false;
-                }
-                
-                dados.linksRaiz.push(...novosLinks);
-                guardarDados();
-                renderizar();
-                mostrarMensagem('Importado', `${novosLinks.length} sites importados do JSON!`, 'success', 3000);
-                return true;
+                throw new Error('Formato JSON inválido');
             } catch (e) {
                 mostrarMensagem('Erro', 'JSON inválido: ' + e.message, 'error', 3000);
                 return false;
@@ -1713,11 +1734,6 @@
             return html;
         }
         
-        function exportarJSON() {
-            const links = dados.linksRaiz.map(link => ({ name: link.nome, url: link.url }));
-            return JSON.stringify(links, null, 2);
-        }
-        
         function carregarConfigGist() {
             const saved = localStorage.getItem('gistConfig');
             if (saved) {
@@ -1780,12 +1796,9 @@
                 return;
             }
             
-            let content;
-            if (gistConfig.filename.endsWith('.json')) {
-                content = exportarJSON();
-            } else {
-                content = exportarHTML();
-            }
+            // SEMPRE exportar em JSON completo para preservar pastas
+            const content = exportarJSON();
+            const filename = gistConfig.filename.endsWith('.json') ? gistConfig.filename : 'startpage.json';
             
             try {
                 const url = gistConfig.gistId ? `https://api.github.com/gists/${gistConfig.gistId}` : 'https://api.github.com/gists';
@@ -1793,7 +1806,11 @@
                 const response = await fetch(url, {
                     method,
                     headers: { 'Authorization': `token ${gistConfig.token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ description: 'StartPage', public: false, files: { [gistConfig.filename]: { content } } })
+                    body: JSON.stringify({ 
+                        description: 'StartPage - Favoritos com Pastas', 
+                        public: false, 
+                        files: { [filename]: { content } } 
+                    })
                 });
                 if (!response.ok) throw new Error();
                 const result = await response.json();
@@ -1801,7 +1818,7 @@
                     gistConfig.gistId = result.id;
                     localStorage.setItem('gistConfig', JSON.stringify(gistConfig));
                 }
-                mostrarMensagem('Sucesso', 'Exportado para Gist!', 'success', 2000);
+                mostrarMensagem('Sucesso', 'Exportado para Gist com todas as pastas!', 'success', 2000);
             } catch(error) {
                 mostrarMensagem('Erro', 'Falha ao exportar', 'error', 2000);
             }
@@ -1968,7 +1985,7 @@
                     <h3>💾 Exportar como</h3>
                     <div class="modal-buttons" style="flex-direction: column; gap: 10px;">
                         <button id="exportHTMLBtn" class="modal-btn primary">📄 HTML (Netscape Bookmarks)</button>
-                        <button id="exportJSONBtn" class="modal-btn primary">📋 JSON (Array de links)</button>
+                        <button id="exportJSONBtn" class="modal-btn primary">📋 JSON (Estrutura Completa)</button>
                         <button id="cancelExportBtn" class="modal-btn secondary">Cancelar</button>
                     </div>
                 </div>
@@ -1998,7 +2015,7 @@
                 a.click();
                 URL.revokeObjectURL(url);
                 modal.remove();
-                mostrarMensagem('Exportado', 'Ficheiro JSON salvo!', 'success', 1500);
+                mostrarMensagem('Exportado', 'Ficheiro JSON com estrutura completa salvo!', 'success', 1500);
             };
             
             document.getElementById('cancelExportBtn').onclick = () => modal.remove();
