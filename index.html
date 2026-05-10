@@ -266,22 +266,21 @@
             white-space: nowrap;
         }
 
-        /* ===== BATCH MODE - NOVO DESIGN BONITO ===== */
+        /* ===== BATCH MODE - DESIGN BONITO COM BOTÕES MENORES ===== */
         
-        /* Checkbox estilizado */
         .batch-checkbox {
             position: absolute;
             top: -8px;
             left: -8px;
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             cursor: pointer;
             z-index: 15;
             display: none;
             appearance: none;
             background: rgba(30, 30, 30, 0.9);
             border: 2px solid rgba(255, 217, 102, 0.5);
-            border-radius: 8px;
+            border-radius: 6px;
             transition: all 0.2s ease;
         }
 
@@ -301,20 +300,18 @@
             align-items: center;
             justify-content: center;
             color: #000;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
-            line-height: 1;
         }
 
-        /* Overlay de seleção no item (mais bonito) */
         .batch-mode .folder-icon.batch-selected .folder-circle,
         .batch-mode .site-icon.batch-selected .site-circle {
-            outline: 3px solid #ffd966;
+            outline: 2px solid #ffd966;
             outline-offset: 2px;
-            filter: drop-shadow(0 0 8px rgba(255, 217, 102, 0.4));
+            filter: drop-shadow(0 0 6px rgba(255, 217, 102, 0.4));
         }
 
-        /* Barra de ações batch - NOVA, MAIS BONITA */
+        /* Barra de ações batch - BOTÕES MENORES */
         .batch-actions-bar {
             position: fixed;
             bottom: 30px;
@@ -322,12 +319,12 @@
             transform: translateX(-50%) translateY(100px);
             background: linear-gradient(135deg, #1e1e1e 0%, #0f0f0f 100%);
             border: 1px solid rgba(255, 217, 102, 0.3);
-            border-radius: 60px;
-            padding: 12px 24px;
+            border-radius: 50px;
+            padding: 8px 20px;
             display: flex;
-            gap: 20px;
+            gap: 12px;
             z-index: 1000;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 217, 102, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(10px);
             transition: transform 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
             opacity: 0;
@@ -343,34 +340,33 @@
         .batch-count {
             background: linear-gradient(135deg, #ffd966 0%, #ffed4a 100%);
             color: #000;
-            padding: 6px 14px;
-            border-radius: 40px;
-            font-size: 0.8rem;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
             font-weight: bold;
             display: flex;
             align-items: center;
-            gap: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            gap: 5px;
         }
 
         .batch-count::before {
             content: "✅";
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
 
         .batch-action-btn {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 8px 20px;
+            padding: 5px 14px;
             cursor: pointer;
             color: #ffffff;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-weight: 500;
-            border-radius: 40px;
+            border-radius: 30px;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 5px;
         }
 
         .batch-action-btn:hover {
@@ -396,27 +392,25 @@
         }
 
         .batch-action-btn.cancel:hover {
-            background: rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.1);
             color: #fff;
         }
 
-        /* Indicador de modo batch no header */
         .batch-mode-indicator {
             position: fixed;
             top: 80px;
             right: 20px;
             background: linear-gradient(135deg, #ffd966, #ffed4a);
             color: #000;
-            padding: 6px 14px;
-            border-radius: 30px;
-            font-size: 0.7rem;
+            padding: 4px 12px;
+            border-radius: 25px;
+            font-size: 0.65rem;
             font-weight: bold;
             z-index: 1000;
             display: none;
             align-items: center;
-            gap: 6px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            animation: pulse 1s infinite;
+            gap: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
         .batch-mode-indicator.show {
@@ -425,17 +419,17 @@
 
         .batch-mode-indicator::before {
             content: "✅";
+            font-size: 0.7rem;
         }
 
-        /* Botão de modo batch dentro da pasta */
         .batch-mode-btn {
             background: #333;
             border: none;
             border-radius: 8px;
-            padding: 7px 14px;
+            padding: 6px 12px;
             cursor: pointer;
             color: #fff;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
@@ -444,7 +438,6 @@
 
         .batch-mode-btn:hover {
             background: #555;
-            transform: scale(1.02);
         }
 
         .batch-mode-btn.active {
@@ -453,7 +446,7 @@
             font-weight: bold;
         }
 
-        /* Botão de 3 pontos no modo edição */
+        /* Botão de 3 pontos */
         .edit-mode .icon-actions-btn {
             display: flex !important;
         }
@@ -465,41 +458,32 @@
             display: none;
             background: rgba(0, 0, 0, 0.85);
             border-radius: 20px;
-            padding: 4px 8px;
+            padding: 3px 6px;
             z-index: 10;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             color: #ffd966;
             transition: all 0.2s;
         }
 
-        .icon-actions-btn:hover {
-            background: rgba(255, 217, 102, 0.3);
-            transform: scale(1.05);
-        }
-
-        /* Menu de contexto */
         .context-menu {
             position: fixed;
             background: #1a1a1a;
             border: 1px solid #ffd966;
-            border-radius: 12px;
-            min-width: 150px;
+            border-radius: 10px;
+            min-width: 130px;
             z-index: 2000;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
             overflow: hidden;
-            backdrop-filter: blur(8px);
         }
 
         .context-menu-item {
-            padding: 10px 16px;
+            padding: 8px 14px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 10px;
-            transition: background-color 0.2s;
-            color: #ffffff;
-            font-size: 0.85rem;
+            gap: 8px;
+            font-size: 0.8rem;
         }
 
         .context-menu-item:hover {
@@ -516,23 +500,16 @@
             left: 20px;
             background: #ffd966;
             color: #000;
-            padding: 6px 14px;
-            border-radius: 25px;
-            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
             font-weight: bold;
             z-index: 1000;
             display: none;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
         .edit-mode-indicator.show {
             display: block;
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.02); }
         }
 
         .folder-content {
@@ -578,10 +555,10 @@
             background: #333;
             border: none;
             border-radius: 8px;
-            padding: 7px 14px;
+            padding: 6px 12px;
             cursor: pointer;
             color: #fff;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
@@ -590,17 +567,12 @@
 
         .back-btn:hover, .add-folder-link-btn:hover {
             background: #555;
-            transform: scale(1.02);
         }
 
         .add-folder-link-btn {
             background: #ffd966;
             color: #000;
             font-weight: bold;
-        }
-
-        .add-folder-link-btn:hover {
-            background: #ffed4a;
         }
 
         .empty-message {
@@ -610,7 +582,7 @@
             font-size: 0.9rem;
         }
 
-        /* Modal */
+        /* Modal - BOTÕES MENORES */
         .modal {
             display: none;
             position: fixed;
@@ -629,40 +601,40 @@
         .modal-content {
             background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
             border: 1px solid #ffd966;
-            border-radius: 24px;
-            padding: 28px;
-            max-width: 480px;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 420px;
             width: 90%;
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
         .modal-content h3 {
             color: #ffd966;
-            margin-bottom: 24px;
-            font-size: 1.4rem;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
             text-align: center;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             color: #ffd966;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-weight: 600;
         }
 
         .form-group input, .form-group select {
             width: 100%;
-            padding: 10px 14px;
+            padding: 8px 12px;
             background-color: #0a0a0a;
             border: 1px solid #333;
-            border-radius: 12px;
+            border-radius: 10px;
             color: #ffffff;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             outline: none;
         }
 
@@ -672,17 +644,17 @@
 
         .modal-buttons {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             justify-content: center;
-            margin-top: 28px;
+            margin-top: 20px;
         }
 
         .modal-btn {
-            padding: 10px 24px;
+            padding: 6px 18px;
             border: none;
-            border-radius: 40px;
+            border-radius: 30px;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-weight: 600;
             transition: all 0.2s;
         }
@@ -704,7 +676,7 @@
         }
 
         .modal-btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-1px);
         }
 
         .password-wrapper {
@@ -714,23 +686,24 @@
         }
         .password-wrapper input {
             flex: 1;
-            padding-right: 40px;
+            padding-right: 35px;
         }
         .toggle-password {
             position: absolute;
-            right: 12px;
+            right: 10px;
             background: transparent;
             border: none;
             color: #ffd966;
             cursor: pointer;
+            font-size: 0.8rem;
         }
 
         .config-status {
-            margin-top: 15px;
-            padding: 10px;
+            margin-top: 12px;
+            padding: 6px 10px;
             background: rgba(255, 217, 102, 0.1);
             border-radius: 8px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             text-align: center;
         }
 
@@ -741,10 +714,11 @@
             background: #1a1a1a;
             border-left: 4px solid;
             border-radius: 8px;
-            padding: 12px 18px;
-            min-width: 250px;
+            padding: 10px 15px;
+            min-width: 220px;
             z-index: 10000;
             animation: slideIn 0.3s ease;
+            font-size: 0.8rem;
         }
 
         @keyframes slideIn {
@@ -755,9 +729,11 @@
         @media (max-width: 600px) {
             .folders-grid, .sites-grid { gap: 10px; }
             .folder-circle, .site-circle { width: 55px; height: 55px; }
-            .batch-actions-bar { padding: 8px 16px; gap: 10px; }
-            .batch-action-btn { padding: 6px 12px; font-size: 0.7rem; }
-            .batch-count { padding: 4px 10px; font-size: 0.7rem; }
+            .batch-actions-bar { padding: 6px 14px; gap: 8px; }
+            .batch-action-btn { padding: 4px 10px; font-size: 0.65rem; }
+            .batch-count { padding: 3px 8px; font-size: 0.65rem; }
+            .modal-content { padding: 16px; }
+            .modal-btn { padding: 5px 14px; font-size: 0.7rem; }
         }
     </style>
 </head>
@@ -790,13 +766,11 @@
         <input type="file" id="fileInput" accept=".html,.htm,.json" style="display: none;">
     </div>
 
-    <!-- Indicadores flutuantes -->
-    <div class="edit-mode-indicator" id="editModeIndicator">✏️ Modo Edição Ativo</div>
-    <div class="batch-mode-indicator" id="batchModeIndicator">✅ Modo Batch Ativo</div>
+    <div class="edit-mode-indicator" id="editModeIndicator">✏️ Modo Edição</div>
+    <div class="batch-mode-indicator" id="batchModeIndicator">✅ Modo Batch</div>
 
-    <!-- Barra de ações batch - NOVA VERSÃO BONITA -->
     <div class="batch-actions-bar" id="batchActionsBar">
-        <span class="batch-count" id="batchCount">0 selecionados</span>
+        <span class="batch-count" id="batchCount">0</span>
         <button class="batch-action-btn" id="batchMoveBtn">📁 Mover</button>
         <button class="batch-action-btn delete" id="batchDeleteBtn">🗑️ Apagar</button>
         <button class="batch-action-btn cancel" id="batchCancelBtn">✕ Cancelar</button>
@@ -806,7 +780,7 @@
     <div id="sitesGrid" class="sites-grid"></div>
     <div id="folderContent" class="folder-content"></div>
 
-    <!-- Modais (mantidos os mesmos) -->
+    <!-- Modais -->
     <div class="modal" id="aboutModal">
         <div class="modal-content">
             <h3>ℹ️ Sobre</h3>
@@ -821,7 +795,7 @@
 
     <div class="modal" id="gistModal">
         <div class="modal-content">
-            <h3>⚙️ Configuração do Gist</h3>
+            <h3>⚙️ Configurar Gist</h3>
             <div class="form-group">
                 <label>🔑 GitHub Token</label>
                 <div class="password-wrapper">
@@ -917,7 +891,7 @@
     <div class="modal" id="moveLinkModal">
         <div class="modal-content">
             <h3>📁 Mover</h3>
-            <p id="moveLinkName" style="text-align:center;"></p>
+            <p id="moveLinkName" style="text-align:center; font-size:0.85rem;"></p>
             <div class="form-group">
                 <select id="moveFolderSelect"></select>
             </div>
@@ -931,7 +905,7 @@
     <div class="modal" id="confirmModal">
         <div class="modal-content">
             <h3>⚠️ Confirmar</h3>
-            <p id="confirmMessage" style="text-align:center;"></p>
+            <p id="confirmMessage" style="text-align:center; font-size:0.85rem;"></p>
             <div class="modal-buttons">
                 <button class="modal-btn secondary" id="cancelConfirm">Cancelar</button>
                 <button class="modal-btn danger" id="confirmAction">Confirmar</button>
@@ -1037,7 +1011,7 @@
             if (editMode) {
                 document.body.classList.add('edit-mode');
                 indicator.classList.add('show');
-                mostrarMensagem('Modo Edição', 'Clique nos ⋮ para editar itens.', 'info', 2500);
+                mostrarMensagem('Modo Edição', 'Clique nos ⋮ para editar itens.', 'info', 2000);
             } else {
                 document.body.classList.remove('edit-mode');
                 indicator.classList.remove('show');
@@ -1060,7 +1034,7 @@
                 indicator.classList.add('show');
                 selectedItems.clear();
                 atualizarBatchCount();
-                mostrarMensagem('Modo Batch', 'Selecione vários itens para mover ou apagar em grupo.', 'success', 2500);
+                mostrarMensagem('Modo Batch', 'Selecione itens para mover/apagar em grupo.', 'success', 2000);
             } else {
                 container.classList.remove('batch-mode');
                 bar.classList.remove('show');
@@ -1069,7 +1043,6 @@
                 mostrarMensagem('Modo Batch', 'Modo batch desativado.', 'info', 1500);
             }
             
-            // Remove highlight de todos os itens
             document.querySelectorAll('.folder-icon, .site-icon').forEach(el => {
                 el.classList.remove('batch-selected');
             });
@@ -1079,7 +1052,8 @@
         }
 
         function atualizarBatchCount() {
-            document.getElementById('batchCount').textContent = `${selectedItems.size} selecionado(s)`;
+            const count = selectedItems.size;
+            document.getElementById('batchCount').textContent = count === 0 ? '0' : `${count}`;
         }
 
         function toggleSelectItem(id, tipo, pastaId = null) {
@@ -1088,7 +1062,6 @@
             else selectedItems.add(key);
             atualizarBatchCount();
             
-            // Atualiza visual do item selecionado
             const elemento = document.querySelector(`[data-key="${key}"]`)?.closest('.folder-icon, .site-icon');
             if (elemento) {
                 if (selectedItems.has(key)) elemento.classList.add('batch-selected');
@@ -1098,10 +1071,10 @@
 
         function apagarSelecionados() {
             if (selectedItems.size === 0) {
-                mostrarMensagem('Aviso', 'Nenhum item selecionado.', 'warning', 2000);
+                mostrarMensagem('Aviso', 'Nenhum item selecionado.', 'warning', 1500);
                 return;
             }
-            mostrarConfirmacao(`Tem certeza que deseja apagar ${selectedItems.size} item(ns)?`, () => {
+            mostrarConfirmacao(`Apagar ${selectedItems.size} item(ns)?`, () => {
                 for (const key of selectedItems) {
                     const parts = key.split('_');
                     const tipo = parts[0];
@@ -1118,7 +1091,7 @@
                 guardarDados();
                 if (pastaAtiva !== null) abrirPasta(pastaAtiva);
                 else renderizar();
-                mostrarMensagem('Batch', `Itens apagados com sucesso!`, 'success', 2000);
+                mostrarMensagem('Batch', 'Itens apagados!', 'success', 1500);
                 atualizarBatchCount();
                 toggleBatchMode();
             });
@@ -1126,15 +1099,15 @@
 
         function moverSelecionados() {
             if (selectedItems.size === 0) {
-                mostrarMensagem('Aviso', 'Nenhum item selecionado.', 'warning', 2000);
+                mostrarMensagem('Aviso', 'Nenhum item selecionado.', 'warning', 1500);
                 return;
             }
             const select = document.getElementById('moveFolderSelect');
-            select.innerHTML = '<option value="-1">📂 Raiz (sem pasta)</option>';
+            select.innerHTML = '<option value="-1">📂 Raiz</option>';
             dados.pastas.forEach((pasta, i) => {
                 select.innerHTML += `<option value="${i}">📁 ${escapeHtml(pasta.nome)}</option>`;
             });
-            document.getElementById('moveLinkName').innerHTML = `📌 Mover ${selectedItems.size} item(ns)`;
+            document.getElementById('moveLinkName').innerHTML = `Mover ${selectedItems.size} item(ns)`;
             const modal = document.getElementById('moveLinkModal');
             modal.classList.add('show');
             
@@ -1164,7 +1137,7 @@
                 guardarDados();
                 if (pastaAtiva !== null) abrirPasta(pastaAtiva);
                 else renderizar();
-                mostrarMensagem('Batch', `${itemsToMove.length} itens movidos!`, 'success', 2000);
+                mostrarMensagem('Batch', `${itemsToMove.length} itens movidos!`, 'success', 1500);
                 modal.classList.remove('show');
                 atualizarBatchCount();
                 toggleBatchMode();
@@ -1174,13 +1147,13 @@
 
         function adicionarPasta(nome) {
             if (!nome?.trim()) {
-                mostrarMensagem('Erro', 'Digite um nome para a pasta!', 'warning', 2000);
+                mostrarMensagem('Erro', 'Digite um nome!', 'warning', 1500);
                 return false;
             }
             dados.pastas.push({ nome: nome.trim(), links: [] });
             guardarDados();
             renderizar();
-            mostrarMensagem('Sucesso', `Pasta "${nome.trim()}" criada!`, 'success', 2000);
+            mostrarMensagem('Sucesso', `Pasta "${nome.trim()}" criada!`, 'success', 1500);
             return true;
         }
 
@@ -1255,7 +1228,6 @@
                 sitesContainer.innerHTML = sitesHtml;
             }
             
-            // Eventos
             document.querySelectorAll('.folder-icon').forEach(el => {
                 const folderDiv = el.querySelector('.folder-circle');
                 if (folderDiv) {
@@ -1398,10 +1370,10 @@
         
         function moverLink(linkId, pastaId = null) {
             const select = document.getElementById('moveFolderSelect');
-            select.innerHTML = '<option value="-1">📂 Raiz (sem pasta)</option>';
+            select.innerHTML = '<option value="-1">📂 Raiz</option>';
             dados.pastas.forEach((pasta, i) => { select.innerHTML += `<option value="${i}">📁 ${escapeHtml(pasta.nome)}</option>`; });
             let linkNome = pastaId === null ? dados.linksRaiz[linkId].nome : dados.pastas[pastaId].links[linkId].nome;
-            document.getElementById('moveLinkName').innerHTML = `📌 <strong>${escapeHtml(linkNome)}</strong>`;
+            document.getElementById('moveLinkName').innerHTML = `<strong>${escapeHtml(linkNome)}</strong>`;
             currentMoveLink = pastaId === null ? { origem: 'root', index: linkId } : { origem: 'pasta', pastaOrigem: pastaId, index: linkId };
             document.getElementById('moveLinkModal').classList.add('show');
         }
@@ -1412,14 +1384,14 @@
                     dados.linksRaiz.splice(linkId, 1);
                     guardarDados();
                     renderizar();
-                    mostrarMensagem('Apagado', 'Site removido', 'success', 1500);
+                    mostrarMensagem('Apagado', 'Site removido', 'success', 1000);
                 });
             } else {
                 mostrarConfirmacao(`Apagar "${dados.pastas[pastaId].links[linkId].nome}"?`, () => {
                     dados.pastas[pastaId].links.splice(linkId, 1);
                     guardarDados();
                     abrirPasta(pastaId);
-                    mostrarMensagem('Apagado', 'Site removido', 'success', 1500);
+                    mostrarMensagem('Apagado', 'Site removido', 'success', 1000);
                 });
             }
         }
@@ -1431,7 +1403,7 @@
         }
         
         function apagarPasta(index) {
-            mostrarConfirmacao(`Apagar pasta "${dados.pastas[index].nome}" e todos os seus sites?`, () => {
+            mostrarConfirmacao(`Apagar pasta "${dados.pastas[index].nome}"?`, () => {
                 dados.pastas.splice(index, 1);
                 guardarDados();
                 if (pastaAtiva === index) {
@@ -1441,7 +1413,7 @@
                     pastaAtiva = null;
                 } else if (pastaAtiva !== null && pastaAtiva > index) pastaAtiva--;
                 renderizar();
-                mostrarMensagem('Apagado', 'Pasta removida', 'success', 1500);
+                mostrarMensagem('Apagado', 'Pasta removida', 'success', 1000);
             });
         }
         
@@ -1451,7 +1423,7 @@
             guardarDados();
             if (pastaAtiva === pastaIndex) abrirPasta(pastaAtiva);
             else renderizar();
-            mostrarMensagem('Adicionado', `"${nome}" adicionado!`, 'success', 1500);
+            mostrarMensagem('Adicionado', `"${nome}" adicionado!`, 'success', 1200);
         }
         
         function atualizarLink(novoNome, novaUrl) {
@@ -1485,7 +1457,7 @@
             document.getElementById('folderContent').classList.remove('active');
             document.getElementById('foldersGrid').style.display = 'grid';
             document.getElementById('sitesGrid').style.display = 'grid';
-            mostrarMensagem('Limpo', 'Todos os dados removidos', 'info', 2000);
+            mostrarMensagem('Limpo', 'Todos os dados removidos', 'info', 1500);
         }
         
         function initSearch() {
@@ -1516,27 +1488,27 @@
                     dados.linksRaiz = (data.linksRaiz || []).map(l => ({ nome: l.nome, url: l.url }));
                     guardarDados();
                     renderizar();
-                    mostrarMensagem('Importado', `${dados.pastas.length} pastas e ${dados.linksRaiz.length} sites!`, 'success', 3000);
+                    mostrarMensagem('Importado', `${dados.pastas.length} pastas, ${dados.linksRaiz.length} sites`, 'success', 2000);
                     return true;
                 }
-                throw new Error('Formato inválido');
-            } catch(e) { mostrarMensagem('Erro', 'JSON inválido', 'error', 3000); return false; }
+                throw new Error();
+            } catch(e) { mostrarMensagem('Erro', 'JSON inválido', 'error', 2000); return false; }
         }
         
         function importarHTML(htmlContent) {
             const parser = new DOMParser();
             const doc = parser.parseFromString(htmlContent, 'text/html');
-            const newPastas = [];
+            let count = 0;
             doc.querySelectorAll('H3').forEach(h3 => {
                 const links = [];
                 let next = h3.nextElementSibling;
                 if (next?.tagName === 'DL') next.querySelectorAll('A').forEach(a => links.push({ nome: a.textContent.trim(), url: a.href }));
-                newPastas.push({ nome: h3.textContent.trim(), links });
+                dados.pastas.push({ nome: h3.textContent.trim(), links });
+                count++;
             });
-            if (newPastas.length > 0) dados.pastas.push(...newPastas);
             guardarDados();
             renderizar();
-            mostrarMensagem('Importado', `${newPastas.length} pastas`, 'success', 3000);
+            mostrarMensagem('Importado', `${count} pastas`, 'success', 2000);
             return true;
         }
         
@@ -1549,7 +1521,7 @@
                     document.getElementById('gistToken').value = gistConfig.token;
                     document.getElementById('gistId').value = gistConfig.gistId;
                     document.getElementById('gistFilename').value = gistConfig.filename;
-                    document.getElementById('gistConfigStatus').innerHTML = gistConfig.gistId ? `✅ Configurado: ${gistConfig.gistId.substring(0,15)}...` : '⚠️ Sem Gist ID';
+                    document.getElementById('gistConfigStatus').innerHTML = gistConfig.gistId ? `✅ ID: ${gistConfig.gistId.substring(0,12)}...` : '⚠️ Sem Gist ID';
                 } catch(e) {}
             }
         }
@@ -1559,7 +1531,7 @@
             gistConfig.gistId = document.getElementById('gistId').value;
             gistConfig.filename = document.getElementById('gistFilename').value;
             localStorage.setItem(GIST_CONFIG_KEY, JSON.stringify(gistConfig));
-            mostrarMensagem('Configurado', 'Gist salvo!', 'success', 2000);
+            mostrarMensagem('Configurado', 'Gist salvo!', 'success', 1500);
             document.getElementById('gistModal').classList.remove('show');
         }
         
@@ -1570,7 +1542,7 @@
             document.getElementById('gistId').value = '';
             document.getElementById('gistFilename').value = 'startpage.json';
             document.getElementById('gistConfigStatus').innerHTML = '🗑️ Configurações removidas';
-            mostrarMensagem('Limpo', 'Configurações do Gist removidas', 'info', 2000);
+            mostrarMensagem('Limpo', 'Configurações do Gist removidas', 'info', 1500);
             document.getElementById('gistModal').classList.remove('show');
         }
         
@@ -1593,7 +1565,7 @@
                     importarJSON(content);
                     mostrarMensagem('Sucesso', 'Dados carregados do Gist!', 'success', 2000);
                 } catch(error) {
-                    mostrarMensagem('Erro', 'Falha ao carregar', 'error', 3000);
+                    mostrarMensagem('Erro', 'Falha ao carregar', 'error', 2000);
                 }
             });
         }
@@ -1618,12 +1590,12 @@
                 if (!gistConfig.gistId) {
                     gistConfig.gistId = result.id;
                     localStorage.setItem(GIST_CONFIG_KEY, JSON.stringify(gistConfig));
-                    mostrarMensagem('Gist Criado', `ID: ${result.id}`, 'success', 4000);
+                    mostrarMensagem('Gist Criado', `ID: ${result.id}`, 'success', 3000);
                 } else {
-                    mostrarMensagem('Sucesso', 'Exportado para Gist!', 'success', 2000);
+                    mostrarMensagem('Sucesso', 'Exportado para Gist!', 'success', 1500);
                 }
             } catch(error) {
-                mostrarMensagem('Erro', 'Falha ao exportar', 'error', 3000);
+                mostrarMensagem('Erro', 'Falha ao exportar', 'error', 2000);
             }
         }
         
@@ -1632,7 +1604,7 @@
         document.getElementById('saveAddFolder').onclick = () => {
             const nome = document.getElementById('newFolderName').value.trim();
             if (nome) { adicionarPasta(nome); document.getElementById('addFolderModal').classList.remove('show'); }
-            else mostrarMensagem('Erro', 'Digite um nome!', 'warning', 2000);
+            else mostrarMensagem('Erro', 'Digite um nome!', 'warning', 1500);
         };
         document.getElementById('cancelAddFolder').onclick = () => document.getElementById('addFolderModal').classList.remove('show');
         document.getElementById('editModeBtn').onclick = () => { dropdownMenu.classList.remove('show'); toggleEditMode(); };
@@ -1644,7 +1616,7 @@
         document.getElementById('batchCancelBtn').onclick = () => toggleBatchMode();
         document.getElementById('addLinkBtnHeader').onclick = () => {
             const select = document.getElementById('folderSelect');
-            select.innerHTML = '<option value="-1">📂 Raiz (sem pasta)</option>';
+            select.innerHTML = '<option value="-1">📂 Raiz</option>';
             dados.pastas.forEach((p, i) => select.innerHTML += `<option value="${i}">📁 ${escapeHtml(p.nome)}</option>`);
             document.getElementById('addLinkModal').classList.add('show');
         };
@@ -1652,7 +1624,7 @@
             const nome = document.getElementById('newLinkName').value.trim();
             const url = document.getElementById('newLinkUrl').value.trim();
             const pasta = parseInt(document.getElementById('folderSelect').value);
-            if (!nome || !url) return mostrarMensagem('Erro', 'Preencha todos os campos', 'warning', 1500);
+            if (!nome || !url) return mostrarMensagem('Erro', 'Preencha os campos', 'warning', 1500);
             if (!url.startsWith('http')) return mostrarMensagem('Erro', 'URL inválida', 'warning', 1500);
             adicionarLink(nome, url, pasta);
             document.getElementById('addLinkModal').classList.remove('show');
@@ -1693,7 +1665,7 @@
                 if (pastaAtiva !== null) abrirPasta(pastaAtiva);
                 else renderizar();
                 document.getElementById('moveLinkModal').classList.remove('show');
-                mostrarMensagem('Movido', `"${link.nome}" movido!`, 'success', 2000);
+                mostrarMensagem('Movido', `"${link.nome}"`, 'success', 1200);
                 currentMoveLink = null;
             }
         };
@@ -1714,7 +1686,7 @@
             const modal = document.createElement('div');
             modal.className = 'modal';
             modal.style.display = 'flex';
-            modal.innerHTML = `<div class="modal-content"><h3>💾 Exportar</h3><div class="modal-buttons" style="flex-direction:column;gap:10px;"><button id="exportHTMLBtn" class="modal-btn primary">📄 HTML</button><button id="exportJSONBtn" class="modal-btn primary">📋 JSON</button><button id="cancelExportBtn" class="modal-btn secondary">Cancelar</button></div></div>`;
+            modal.innerHTML = `<div class="modal-content"><h3>💾 Exportar</h3><div class="modal-buttons" style="flex-direction:column;gap:8px;"><button id="exportHTMLBtn" class="modal-btn primary">📄 HTML</button><button id="exportJSONBtn" class="modal-btn primary">📋 JSON</button><button id="cancelExportBtn" class="modal-btn secondary">Cancelar</button></div></div>`;
             document.body.appendChild(modal);
             document.getElementById('exportHTMLBtn').onclick = () => {
                 let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>\n<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">\n<TITLE>StartPage</TITLE>\n<H1>Bookmarks</H1>\n<DL><p>`;
@@ -1732,7 +1704,7 @@
                 a.click();
                 URL.revokeObjectURL(a.href);
                 modal.remove();
-                mostrarMensagem('Exportado', 'HTML salvo!', 'success', 1500);
+                mostrarMensagem('Exportado', 'HTML salvo!', 'success', 1200);
             };
             document.getElementById('exportJSONBtn').onclick = () => {
                 const blob = new Blob([exportarJSON()], { type: 'application/json' });
@@ -1742,7 +1714,7 @@
                 a.click();
                 URL.revokeObjectURL(a.href);
                 modal.remove();
-                mostrarMensagem('Exportado', 'JSON salvo!', 'success', 1500);
+                mostrarMensagem('Exportado', 'JSON salvo!', 'success', 1200);
             };
             document.getElementById('cancelExportBtn').onclick = () => modal.remove();
         };
@@ -1760,13 +1732,13 @@
         document.getElementById('fileInput').onchange = (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            mostrarConfirmacao(`Importar "${file.name}"? Os dados atuais serão apagados.`, () => {
+            mostrarConfirmacao(`Importar "${file.name}"?`, () => {
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     limparTudo();
                     if (file.name.endsWith('.json')) importarJSON(event.target.result);
                     else importarHTML(event.target.result);
-                    mostrarMensagem('Importado', `Dados de "${file.name}"`, 'success', 3000);
+                    mostrarMensagem('Importado', `Dados de "${file.name}"`, 'success', 2000);
                 };
                 reader.readAsText(file);
                 fileInput.value = '';
@@ -1779,22 +1751,17 @@
                     { nome: "Facebook", url: "https://facebook.com" },
                     { nome: "Instagram", url: "https://instagram.com" },
                     { nome: "Twitter", url: "https://twitter.com" },
-                    { nome: "YouTube", url: "https://youtube.com" },
-                    { nome: "LinkedIn", url: "https://linkedin.com" }
+                    { nome: "YouTube", url: "https://youtube.com" }
                 ]},
                 { nome: "Tools", links: [
                     { nome: "Google", url: "https://google.com" },
                     { nome: "GitHub", url: "https://github.com" },
-                    { nome: "Stack Overflow", url: "https://stackoverflow.com" },
-                    { nome: "ChatGPT", url: "https://chat.openai.com" },
-                    { nome: "DeepL", url: "https://deepl.com" }
+                    { nome: "ChatGPT", url: "https://chat.openai.com" }
                 ]}
             ];
             dados.linksRaiz = [
                 { nome: "Gmail", url: "https://gmail.com" },
-                { nome: "Drive", url: "https://drive.google.com" },
-                { nome: "Calendar", url: "https://calendar.google.com" },
-                { nome: "Fast", url: "https://fast.com/" }
+                { nome: "Drive", url: "https://drive.google.com" }
             ];
             guardarDados();
         }
