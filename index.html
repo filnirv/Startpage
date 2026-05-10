@@ -266,8 +266,7 @@
             white-space: nowrap;
         }
 
-        /* ===== BATCH MODE - DESIGN BONITO COM BOTÕES MENORES ===== */
-        
+        /* ===== BATCH MODE ===== */
         .batch-checkbox {
             position: absolute;
             top: -8px;
@@ -311,7 +310,7 @@
             filter: drop-shadow(0 0 6px rgba(255, 217, 102, 0.4));
         }
 
-        /* Barra de ações batch - BOTÕES MENORES */
+        /* Barra de ações batch - compacta */
         .batch-actions-bar {
             position: fixed;
             bottom: 30px;
@@ -422,22 +421,60 @@
             font-size: 0.7rem;
         }
 
-        .batch-mode-btn {
+        /* Botões do header da pasta - REDUZIDOS */
+        .folder-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 8px 12px;
+            background: rgba(255, 217, 102, 0.1);
+            border-radius: 12px;
+        }
+
+        .folder-title-large {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #ffd966;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .folder-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        /* Botões dentro da pasta - COMPACTOS */
+        .back-btn, .add-folder-link-btn, .batch-mode-btn {
             background: #333;
             border: none;
-            border-radius: 8px;
-            padding: 6px 12px;
+            border-radius: 6px;
+            padding: 4px 10px;
             cursor: pointer;
             color: #fff;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
         }
 
-        .batch-mode-btn:hover {
+        .back-btn:hover, .add-folder-link-btn:hover, .batch-mode-btn:hover {
             background: #555;
+            transform: scale(1.02);
+        }
+
+        .add-folder-link-btn {
+            background: #ffd966;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .add-folder-link-btn:hover {
+            background: #ffed4a;
         }
 
         .batch-mode-btn.active {
@@ -526,55 +563,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .folder-header-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding: 10px 15px;
-            background: rgba(255, 217, 102, 0.1);
-            border-radius: 12px;
-        }
-
-        .folder-title-large {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #ffd966;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .folder-actions {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .back-btn, .add-folder-link-btn {
-            background: #333;
-            border: none;
-            border-radius: 8px;
-            padding: 6px 12px;
-            cursor: pointer;
-            color: #fff;
-            font-size: 0.75rem;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .back-btn:hover, .add-folder-link-btn:hover {
-            background: #555;
-        }
-
-        .add-folder-link-btn {
-            background: #ffd966;
-            color: #000;
-            font-weight: bold;
-        }
-
         .empty-message {
             text-align: center;
             color: #666;
@@ -582,7 +570,7 @@
             font-size: 0.9rem;
         }
 
-        /* Modal - BOTÕES MENORES */
+        /* Modal - compacto */
         .modal {
             display: none;
             position: fixed;
@@ -734,6 +722,9 @@
             .batch-count { padding: 3px 8px; font-size: 0.65rem; }
             .modal-content { padding: 16px; }
             .modal-btn { padding: 5px 14px; font-size: 0.7rem; }
+            .folder-header-bar { padding: 6px 10px; }
+            .back-btn, .add-folder-link-btn, .batch-mode-btn { padding: 3px 8px; font-size: 0.65rem; }
+            .folder-title-large { font-size: 0.9rem; }
         }
     </style>
 </head>
