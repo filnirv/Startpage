@@ -46,7 +46,7 @@
 
         #searchBox {
             width: 100%;
-            padding: 8px 35px 8px 12px;
+            padding: 8px 70px 8px 12px;
             background-color: #1a1a1a;
             border: 1px solid #333;
             border-radius: 8px;
@@ -60,22 +60,49 @@
             border-color: #ffd966;
         }
 
-        .clear-search {
+        .search-actions {
             position: absolute;
             right: 8px;
             top: 50%;
             transform: translateY(-50%);
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .search-icon-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0;
             width: 20px;
             height: 20px;
-            border-radius: 50%;
-            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffd966;
+            transition: all 0.2s;
+            border-radius: 4px;
+        }
+
+        .search-icon-btn:hover {
+            transform: scale(1.1);
+            color: #ffed4a;
+        }
+
+        .clear-search {
             background: #555;
+            border: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
             color: #fff;
             cursor: pointer;
             display: none;
             align-items: center;
             justify-content: center;
-            font-size: 0.7rem;
+            font-size: 0.6rem;
             transition: all 0.2s;
         }
 
@@ -725,6 +752,7 @@
             .folder-header-bar { padding: 6px 10px; }
             .back-btn, .add-folder-link-btn, .batch-mode-btn { padding: 3px 8px; font-size: 0.65rem; }
             .folder-title-large { font-size: 0.9rem; }
+            #searchBox { padding: 8px 65px 8px 12px; }
         }
     </style>
 </head>
@@ -732,8 +760,11 @@
     <div class="header">
         <div class="search-container">
             <div class="search-wrapper">
-                <input type="text" id="searchBox" placeholder="🔍 Pesquisar em pastas e sites..." disabled>
-                <button id="clearSearchBtn" class="clear-search">✕</button>
+                <input type="text" id="searchBox" placeholder="🔍 Pesquisar favoritos ou pressione Enter para buscar na web..." disabled>
+                <div class="search-actions">
+                    <button id="webSearchBtn" class="search-icon-btn" title="Pesquisar no DuckDuckGo">🔎</button>
+                    <button id="clearSearchBtn" class="clear-search">✕</button>
+                </div>
             </div>
         </div>
         <div class="action-buttons">
@@ -1451,9 +1482,21 @@
             mostrarMensagem('Limpo', 'Todos os dados removidos', 'info', 1500);
         }
         
+        function pesquisarWeb() {
+            const searchTerm = document.getElementById('searchBox').value.trim();
+            if (searchTerm) {
+                const url = `https://duckduckgo.com/?q=${encodeURIComponent(searchTerm)}`;
+                window.open(url, '_blank');
+            } else {
+                mostrarMensagem('Pesquisa Web', 'Digite algo para pesquisar no DuckDuckGo', 'info', 2000);
+            }
+        }
+        
         function initSearch() {
             const searchBox = document.getElementById('searchBox');
             const clearBtn = document.getElementById('clearSearchBtn');
+            const webSearchBtn = document.getElementById('webSearchBtn');
+            
             searchBox.addEventListener('input', () => {
                 if (pastaAtiva !== null) {
                     document.getElementById('folderContent').classList.remove('active');
@@ -1464,7 +1507,34 @@
                 renderizar();
                 clearBtn.classList.toggle('show', searchBox.value.trim() !== '');
             });
-            clearBtn.onclick = () => { searchBox.value = ''; clearBtn.classList.remove('show'); searchBox.dispatchEvent(new Event('input')); };
+            
+            searchBox.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const searchTerm = searchBox.value.trim();
+                    if (searchTerm && !searchTermFiltraResultados(searchTerm)) {
+                        pesquisarWeb();
+                    }
+                }
+            });
+            
+            webSearchBtn.addEventListener('click', () => {
+                pesquisarWeb();
+            });
+            
+            clearBtn.onclick = () => { 
+                searchBox.value = ''; 
+                clearBtn.classList.remove('show'); 
+                searchBox.dispatchEvent(new Event('input'));
+            };
+        }
+        
+        function searchTermFiltraResultados(termo) {
+            if (!termo) return false;
+            const termoLower = termo.toLowerCase();
+            const temPasta = dados.pastas.some(p => p.nome.toLowerCase().includes(termoLower));
+            const temLinkRaiz = dados.linksRaiz.some(l => l.nome.toLowerCase().includes(termoLower));
+            const temLinkPasta = dados.pastas.some(p => p.links.some(l => l.nome.toLowerCase().includes(termoLower)));
+            return temPasta || temLinkRaiz || temLinkPasta;
         }
         
         function exportarJSON() {
