@@ -472,77 +472,6 @@
             font-size: 0.7rem;
         }
 
-        /* Botões do header da pasta - REDUZIDOS */
-        .folder-header-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            row-gap: 8px;
-            margin-bottom: 20px;
-            padding: 8px 12px;
-            background: rgba(255, 217, 102, 0.1);
-            border-radius: 12px;
-        }
-
-        .folder-title-large {
-            font-size: 1rem;
-            font-weight: bold;
-            color: #ffd966;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            flex: 1 1 auto;
-        }
-
-        .folder-actions {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            flex-wrap: wrap;
-            flex-shrink: 0;
-        }
-
-        /* Botões dentro da pasta - COMPACTOS */
-        .back-btn, .add-folder-link-btn, .batch-mode-btn {
-            background: #333;
-            border: none;
-            border-radius: 6px;
-            padding: 4px 10px;
-            cursor: pointer;
-            color: #fff;
-            font-size: 0.7rem;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .back-btn:hover, .add-folder-link-btn:hover, .batch-mode-btn:hover {
-            background: #555;
-            transform: scale(1.02);
-        }
-
-        .add-folder-link-btn {
-            background: #ffd966;
-            color: #000;
-            font-weight: bold;
-        }
-
-        .add-folder-link-btn:hover {
-            background: #ffed4a;
-        }
-
-        .batch-mode-btn.active {
-            background: linear-gradient(135deg, #ffd966, #ffed4a);
-            color: #000;
-            font-weight: bold;
-        }
-
         /* Botão de 3 pontos */
         .edit-mode .icon-actions-btn {
             display: flex !important;
@@ -564,14 +493,16 @@
         }
 
         body.edit-mode .site-icon,
-        body.edit-mode .folder-icon {
+        body.edit-mode .folder-icon,
+        body.edit-mode .tab-item[data-folder-index] {
             cursor: grab;
             touch-action: none;
             user-select: none;
         }
 
         .site-icon.dragging,
-        .folder-icon.dragging {
+        .folder-icon.dragging,
+        .tab-item.dragging {
             opacity: 0.55;
             transform: scale(1.06);
             z-index: 500;
@@ -649,6 +580,9 @@
 
         .tab-item {
             flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 5px;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #ccc;
@@ -668,7 +602,31 @@
             border-color: #ffd966;
         }
 
-        /* ===== SWIPE (conteúdo das pastas) ===== */
+        .tab-label {
+            cursor: pointer;
+        }
+
+        .tab-edit-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            line-height: 1;
+            padding: 1px 3px;
+            border-radius: 8px;
+            opacity: 0.85;
+            cursor: pointer;
+        }
+
+        .tab-item.active .tab-edit-icon {
+            opacity: 1;
+        }
+
+        .tab-edit-icon:hover {
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        /* ===== Conteúdo da pasta ativa (swipe) ===== */
         .swipe-viewport {
             overflow: hidden;
             position: relative;
@@ -694,21 +652,6 @@
             min-width: 0;
             box-sizing: border-box;
             padding-right: 2px;
-        }
-
-        .page-folder-edit-btn {
-            display: none;
-            background: transparent;
-            border: none;
-            color: #ffd966;
-            cursor: pointer;
-            font-size: 1rem;
-            padding: 2px 8px;
-            flex-shrink: 0;
-        }
-
-        .edit-mode .page-folder-edit-btn {
-            display: inline-flex;
         }
 
         .search-results {
@@ -874,11 +817,6 @@
             .batch-count { padding: 3px 8px; font-size: 0.65rem; }
             .modal-content { padding: 16px; }
             .modal-btn { padding: 5px 14px; font-size: 0.7rem; }
-            .folder-header-bar { padding: 6px 10px; }
-            .folder-title-large { flex-basis: 100%; }
-            .folder-actions { flex-basis: 100%; justify-content: flex-end; }
-            .back-btn, .add-folder-link-btn, .batch-mode-btn { padding: 3px 8px; font-size: 0.65rem; }
-            .folder-title-large { font-size: 0.9rem; }
             #searchBox { padding: 8px 65px 8px 12px; }
         }
     </style>
@@ -1101,11 +1039,66 @@
             document.getElementById('confirmModal').classList.add('show');
         }
 
-        function getFaviconUrl(url) {
+        // ===== Cache de favicons (localStorage) =====
+        // Evita repetir o pedido ao serviço externo de favicons a cada carregamento:
+        // na 1ª vez mostra o ícone remoto e guarda-o em base64; das seguintes usa a cópia local.
+        const FAVICON_CACHE_KEY = 'faviconCacheV1';
+        const FAVICON_CACHE_MAX = 500;
+
+        function getFaviconCache() {
             try {
-                const urlObj = new URL(url);
-                return `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=36`;
-            } catch(e) { return ''; }
+                return JSON.parse(localStorage.getItem(FAVICON_CACHE_KEY) || '{}');
+            } catch (e) { return {}; }
+        }
+
+        function saveFaviconCache(cache) {
+            try {
+                const entries = Object.entries(cache);
+                if (entries.length > FAVICON_CACHE_MAX) {
+                    entries.sort((a, b) => (a[1].ts || 0) - (b[1].ts || 0));
+                    const excesso = entries.length - FAVICON_CACHE_MAX;
+                    for (let i = 0; i < excesso; i++) delete cache[entries[i][0]];
+                }
+                localStorage.setItem(FAVICON_CACHE_KEY, JSON.stringify(cache));
+            } catch (e) {
+                // localStorage indisponível ou cheio - ignora silenciosamente
+            }
+        }
+
+        function getFaviconHostname(url) {
+            try { return new URL(url).hostname; } catch (e) { return null; }
+        }
+
+        // Devolve de imediato o src a usar (cache se já existir, senão o URL remoto)
+        // e, em segundo plano, tenta guardar o favicon em cache para a próxima vez.
+        function resolverFaviconSrc(url) {
+            const hostname = getFaviconHostname(url);
+            if (!hostname) return '';
+            const cache = getFaviconCache();
+            const cached = cache[hostname];
+            if (cached?.data) return cached.data;
+            const remoteUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=36`;
+            cacheFaviconAsync(hostname, remoteUrl);
+            return remoteUrl;
+        }
+
+        async function cacheFaviconAsync(hostname, remoteUrl) {
+            try {
+                const resp = await fetch(remoteUrl);
+                if (!resp.ok) return;
+                const blob = await resp.blob();
+                const dataUrl = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+                const cache = getFaviconCache();
+                cache[hostname] = { data: dataUrl, ts: Date.now() };
+                saveFaviconCache(cache);
+            } catch (e) {
+                // Sem rede/CORS disponível - continua a usar o URL remoto sem cache
+            }
         }
 
         function escapeHtml(text) {
@@ -1177,6 +1170,68 @@
                             aplicarNovaOrdem(array, novaOrdem);
                             guardarDados();
                             aoTerminar();
+                        }
+                    };
+
+                    document.addEventListener('pointermove', onPointerMove);
+                    document.addEventListener('pointerup', onPointerUp);
+                    document.addEventListener('pointercancel', onPointerUp);
+                });
+            });
+        }
+
+        // Torna as tabs de pastas (na barra de separadores) arrastáveis para reordenar,
+        // seguindo o mesmo padrão de tornarArrastavel. A tab "Início" nunca é arrastável
+        // nem pode ser ultrapassada, e só reordena pastas entre si.
+        function tornarTabsArrastaveis() {
+            const tabsBar = document.getElementById('tabsBar');
+            if (!tabsBar) return;
+            const LIMIAR = 8;
+
+            tabsBar.querySelectorAll('.tab-item[data-folder-index]').forEach((item) => {
+                item.addEventListener('dragstart', (e) => e.preventDefault());
+                item.addEventListener('pointerdown', (e) => {
+                    if (!editMode) return;
+                    if (e.target.closest('.tab-edit-icon')) return;
+
+                    const startX = e.clientX;
+                    const startY = e.clientY;
+                    const pointerId = e.pointerId;
+                    let arrastando = false;
+                    let dragItem = null;
+
+                    const onPointerMove = (ev) => {
+                        if (!arrastando) {
+                            if (Math.abs(ev.clientX - startX) < LIMIAR && Math.abs(ev.clientY - startY) < LIMIAR) return;
+                            arrastando = true;
+                            dragItem = item;
+                            dragItem.classList.add('dragging');
+                            try { dragItem.setPointerCapture(pointerId); } catch (err) {}
+                        }
+                        ev.preventDefault();
+                        const alvo = document.elementFromPoint(ev.clientX, ev.clientY);
+                        const alvoItem = alvo ? alvo.closest('.tab-item[data-folder-index]') : null;
+                        if (alvoItem && alvoItem !== dragItem && tabsBar.contains(alvoItem)) {
+                            const itens = Array.from(tabsBar.children);
+                            const idxDrag = itens.indexOf(dragItem);
+                            const idxAlvo = itens.indexOf(alvoItem);
+                            if (idxDrag < idxAlvo) tabsBar.insertBefore(dragItem, alvoItem.nextSibling);
+                            else tabsBar.insertBefore(dragItem, alvoItem);
+                        }
+                    };
+
+                    const onPointerUp = () => {
+                        document.removeEventListener('pointermove', onPointerMove);
+                        document.removeEventListener('pointerup', onPointerUp);
+                        document.removeEventListener('pointercancel', onPointerUp);
+                        if (arrastando && dragItem) {
+                            dragItem.classList.remove('dragging');
+                            const novaOrdem = Array.from(tabsBar.querySelectorAll('.tab-item[data-folder-index]'))
+                                .map(el => parseInt(el.dataset.folderIndex));
+                            aplicarNovaOrdem(dados.pastas, novaOrdem);
+                            if (pastaAtiva !== null) pastaAtiva = novaOrdem.indexOf(pastaAtiva);
+                            guardarDados();
+                            renderizar();
                         }
                     };
 
@@ -1403,15 +1458,16 @@
             return true;
         }
 
-        // ===== Tabs + swipe (pastas como separadores deslizáveis) =====
+        // ===== Tabs (pastas como separadores) + conteúdo da pasta ativa =====
         // Índice de aba: 0 = Início (raiz), N = dados.pastas[N-1]
         function totalAbas() { return dados.pastas.length + 1; }
         function abaAtivaIndex() { return pastaAtiva === null ? 0 : pastaAtiva + 1; }
 
         function gerarTabsHtml() {
-            let html = `<button class="tab-item${pastaAtiva === null ? ' active' : ''}" data-tab-index="0">🏠 Início</button>`;
+            let html = `<div class="tab-item${pastaAtiva === null ? ' active' : ''}" data-tab-index="0"><span class="tab-label">🏠 Início</span></div>`;
             dados.pastas.forEach((p, i) => {
-                html += `<button class="tab-item${pastaAtiva === i ? ' active' : ''}" data-tab-index="${i + 1}">📁 ${escapeHtml(p.nome)}</button>`;
+                const editIcon = editMode ? `<span class="tab-edit-icon" data-folder-id="${i}" title="Editar pasta">✏️</span>` : '';
+                html += `<div class="tab-item${pastaAtiva === i ? ' active' : ''}" data-tab-index="${i + 1}" data-folder-index="${i}"><span class="tab-label">📁 ${escapeHtml(p.nome)}</span>${editIcon}</div>`;
             });
             return html;
         }
@@ -1426,7 +1482,7 @@
             let sitesHtml = '';
             for (let i = 0; i < links.length; i++) {
                 const link = links[i];
-                const faviconUrl = getFaviconUrl(link.url);
+                const faviconUrl = resolverFaviconSrc(link.url);
                 const key = isRoot ? `link_root_${i}` : `link_folder_${pastaIndex}_${i}`;
                 sitesHtml += `
                     <div class="site-icon" data-url="${escapeHtml(link.url)}" data-key="${key}" data-index="${i}">
@@ -1441,14 +1497,8 @@
                 `;
             }
 
-            const titulo = isRoot ? '🏠 Início' : `📁 ${escapeHtml(pasta.nome)}`;
-            const editBtn = isRoot ? '' : `<button class="page-folder-edit-btn" data-type="folder" data-id="${pastaIndex}" title="Editar pasta">⋮</button>`;
-
             return `
                 <div class="swipe-page" data-tab-index="${tabIndex}">
-                    <div class="folder-header-bar">
-                        <div class="folder-title-large"><span>${titulo}</span>${editBtn}</div>
-                    </div>
                     <div class="sites-grid" id="${gridId}">${sitesHtml || '<div class="empty-message">✨ Nenhum site aqui ✨</div>'}</div>
                 </div>
             `;
@@ -1483,14 +1533,6 @@
                     const parent = btn.dataset.parent;
                     const pastaId = parent === 'pasta' ? parseInt(btn.closest('.swipe-page').dataset.tabIndex) - 1 : null;
                     abrirContextMenu(e, 'link', id, pastaId);
-                });
-            });
-
-            document.querySelectorAll('.swipe-page .page-folder-edit-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (!editMode) return;
-                    abrirContextMenu(e, 'folder', parseInt(btn.dataset.id));
                 });
             });
 
@@ -1532,8 +1574,8 @@
             track.style.transform = `translateX(-${index * 100}%)`;
             if (!animate) { void track.offsetWidth; track.style.transition = ''; }
 
-            document.querySelectorAll('.tab-item').forEach(btn => {
-                btn.classList.toggle('active', parseInt(btn.dataset.tabIndex) === index);
+            document.querySelectorAll('.tab-item').forEach(item => {
+                item.classList.toggle('active', parseInt(item.dataset.tabIndex) === index);
             });
             const tabAtiva = document.querySelector(`.tab-item[data-tab-index="${index}"]`);
             if (tabAtiva) tabAtiva.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
@@ -1575,9 +1617,16 @@
             void track.offsetWidth;
             track.style.transition = '';
 
-            tabsBar.querySelectorAll('.tab-item').forEach(btn => {
-                btn.addEventListener('click', () => irParaAba(parseInt(btn.dataset.tabIndex)));
+            tabsBar.querySelectorAll('.tab-item .tab-label').forEach(el => {
+                el.addEventListener('click', () => irParaAba(parseInt(el.closest('.tab-item').dataset.tabIndex)));
             });
+            tabsBar.querySelectorAll('.tab-edit-icon').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    abrirContextMenu(e, 'folder', parseInt(el.dataset.folderId));
+                });
+            });
+            if (editMode) tornarTabsArrastaveis();
             const tabAtiva = tabsBar.querySelector('.tab-item.active');
             if (tabAtiva) tabAtiva.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
 
@@ -1630,7 +1679,7 @@
                 let html = '';
                 linksFiltrados.forEach(link => {
                     const displayName = link.isFromFolder ? link.originalNome : link.nome;
-                    const faviconUrl = getFaviconUrl(link.url);
+                    const faviconUrl = resolverFaviconSrc(link.url);
                     html += `
                         <div class="site-icon" data-url="${escapeHtml(link.url)}">
                             <div class="site-circle">
